@@ -95,6 +95,7 @@ timer_elapsed (int64_t then)
 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
+/*backup:
 void
 timer_sleep (int64_t ticks) 
 {
@@ -103,7 +104,22 @@ timer_sleep (int64_t ticks)
   ASSERT (intr_get_level () == INTR_ON);
   while (timer_elapsed (start) < ticks) 
     thread_yield ();
+}*/
+
+/*modified: start*/
+void
+timer_sleep (int64_t ticks)
+{
+  int64_t start = timer_ticks ();
+  struct thread *t = thread_current ();
+
+  ASSERT (intr_get_level () == INTR_ON);
+
+  list_push_back (&block_list, &t->elem);
+  t->wake_time = ticks;
+  thread_block ();
 }
+/*modified: end*/
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
    turned on. */
@@ -180,6 +196,11 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
+
+  /*modified: start*/
+  wake_up_block_list ();
+  /*modified: end*/
+
   thread_tick ();
 }
 
@@ -243,6 +264,28 @@ real_time_sleep (int64_t num, int32_t denom)
       real_time_delay (num, denom); 
     }
 }
+
+/*modified: start*/
+void
+wake_up_block_list(void)
+{
+	struct list_elem *e;
+	
+	ASSERT (intr_get_level () == INTR_OFF);
+	
+	for ( e = list_begin (&block_list); e != list_end (&block_list); e = list_next (e))
+	{
+		struct thread *t = list_entry (e,struct thread,elem);
+		if (!(t->wake_time)) 
+		{
+			list_remove(e);
+			thread_unblock(t);
+			list_push_back(&ready_list,&e);
+		}
+		else wake_time--;
+	}
+}
+/*modified: end*/
 
 /* Busy-wait for approximately NUM/DENOM seconds. */
 static void
