@@ -1,0 +1,13 @@
+# system-wide mercurial configuration file
+# See hgrc(5) for more information
+
+[ui]
+username = Kangmin Yoo <kaniblurous@gmail.com>
+
+[auth]
+repo.prefix = https://os-a-plus-project.googlecode.com/hg/
+repo.username = kaniblurous@gmail.com
+repo.password = TU6Tm5mG3Kb9
+
+[paths]
+default = https://os-a-plus-project.googlecode.com/hg/
