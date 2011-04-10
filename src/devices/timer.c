@@ -113,14 +113,16 @@ timer_sleep (int64_t ticks)
 {
   struct list *bl = blocklist ();
   struct thread *t = thread_current ();
+  enum intr_level old_level;
 
   ASSERT (intr_get_level () == INTR_ON);
 
   list_push_back (bl, &t->elem);
   t->wake_time = ticks;
 
-  intr_disable ();
+  old_level = intr_disable ();
   thread_block ();
+  intr_set_level (old_level);
 }
 /*modified: end*/
 
@@ -275,10 +277,11 @@ wake_up_block_list(void)
 	struct list_elem *e;
 	struct list *bl = blocklist ();
 	struct thread *t;
+	enum intr_level old_level;
 	int ctime,i;
 	tid_t threadid;
 	
-	ASSERT (intr_get_level () == INTR_OFF);
+	//ASSERT (intr_get_level () == INTR_OFF);
 
 	i=0;
 	while(i<list_size(bl))
@@ -287,6 +290,9 @@ wake_up_block_list(void)
 		t = list_entry (e,struct thread,elem);
 		ctime = t->wake_time;
 		threadid = t->tid;
+
+		old_level = intr_disable ();
+
 		if (ctime> 0)
 		{
 			t-> wake_time--;
@@ -296,6 +302,7 @@ wake_up_block_list(void)
 		{
 			thread_unblock(t);
 		}
+		intr_set_level (old_level);
 		i++;
 	}
 }
