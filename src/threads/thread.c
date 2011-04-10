@@ -28,7 +28,7 @@
 static struct list ready_list;
 
 	/*modified:start*/
-static struct runqueue ready_queue;
+static struct runqueue *ready_queue;
 static struct list block_list;
 	/*modified:end*/
 
@@ -137,7 +137,7 @@ thread_start (void)
   /* Start preemptive thread scheduling. */
   intr_enable ();
  
-	init_runqueue (&ready_queue);
+  init_runqueue (&ready_queue);
 
 
   /* Wait for the idle thread to initialize idle_thread. */
@@ -161,9 +161,15 @@ thread_tick (void)
   else
     kernel_ticks++;
 
+  int priority = t->priority;
+  unsigned int time_slice = priority+5;
+
   /* Enforce preemption. */
-  if (++thread_ticks >= TIME_SLICE)
+  if (++thread_ticks >= time_slice){
     intr_yield_on_return ();
+    remove_thread_a(ready_queue, &t->elem);
+    add_thread_e(ready_queue, &t->elem);
+  }
 }
 
 /* Prints thread statistics. */
@@ -273,7 +279,10 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
+	/* modified (start) */
   list_push_back (&ready_list, &t->elem);
+  //add_thread_a (&ready_queue, &t->elem);
+	/* modified (end) */
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }

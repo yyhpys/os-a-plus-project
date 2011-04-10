@@ -5,25 +5,30 @@
 #define MAXSIZE 64
 
 /*Initialize runqueue.*/
-void init_runqueue(struct runqueue *rq)
+void init_runqueue(struct runqueue **rq)
 {
-	rq = (struct runqueue *)malloc(sizeof(struct runqueue));
-	init_prio_array(&(rq->arrays[0]));
-	init_prio_array(&(rq->arrays[1]));
-	rq->active = &(rq->arrays[0]);
-	rq->expired = &(rq->arrays[1]);
+	*rq = (struct runqueue *)malloc(sizeof(struct runqueue));
+	
+	struct prio_array *a = &((*rq)->arrays[0]);
+	struct prio_array *b = &((*rq)->arrays[1]);
+
+	init_prio_array(&a);
+	init_prio_array(&b);
+	(*rq)->arrays[0] = *a;
+	(*rq)->arrays[1] = *b;
+	(*rq)->active = &((*rq)->arrays[0]);
+	(*rq)->expired = &((*rq)->arrays[1]);
 }
 /*Initialize priority array.*/
-void init_prio_array(struct prio_array *array)
+void init_prio_array(struct prio_array **array)
 {
 	int i;
-	array = (struct prio_array *)malloc(sizeof(struct prio_array));
-	array->queue = malloc(sizeof(array->queue));
+	*array = (struct prio_array *)malloc(sizeof(struct prio_array));
+	(*array)->queue = malloc(sizeof((*array)->queue));
 	for(i = 0; i < MAXSIZE; i++)
-		list_init(array->queue[i]);
+		list_init((*array)->queue[i]);
 	
-	array->nr_active = 0;
-	
+	(*array)->nr_active = 0;
 }
 /*Add thread to active array. Get the 2nd argument for list_elem.*/
 void add_thread_a(struct runqueue *rq, struct list_elem *e)

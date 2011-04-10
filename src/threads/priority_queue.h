@@ -21,8 +21,8 @@ struct runqueue
 	struct prio_array *expired;
 	struct prio_array arrays[2];
 };
-void init_runqueue(struct runqueue *rq);
-void init_prio_array(struct prio_array *array);
+void init_runqueue(struct runqueue **rq);
+void init_prio_array(struct prio_array **array);
 void add_thread_a(struct runqueue *rq, struct list_elem *e);
 void add_thread_e(struct runqueue *rq, struct list_elem *e);
 void remove_thread_a(struct runqueue *rq, struct list_elem *e);
