@@ -88,6 +88,20 @@ static tid_t allocate_tid (void);
 
    It is not safe to call thread_current() until this function
    finishes. */
+
+/*function that returns block and ready list address*/
+struct list *
+blocklist (void)
+{ 
+	return &block_list;
+}
+
+struct list *
+readylist (void)
+{
+	return &ready_list;
+}
+
 void
 thread_init (void) 
 {
@@ -229,7 +243,7 @@ void
 thread_block (void) 
 {
   ASSERT (!intr_context ());
-  ASSERT (intr_get_level () == INTR_OFF);
+  /*ASSERT (intr_get_level () == INTR_OFF);*/
 
   thread_current ()->status = THREAD_BLOCKED;
   schedule ();
