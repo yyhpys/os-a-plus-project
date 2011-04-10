@@ -114,7 +114,6 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
 	/*modified:start*/
-  init_runqueue (&ready_queue);
   list_init (&block_list);
 	/*modified:end*/
   list_init (&all_list);
@@ -124,7 +123,7 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
-}
+ }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
    Also creates the idle thread. */
@@ -135,9 +134,11 @@ thread_start (void)
   struct semaphore idle_started;
   sema_init (&idle_started, 0);
   thread_create ("idle", PRI_MIN, idle, &idle_started);
-
   /* Start preemptive thread scheduling. */
   intr_enable ();
+ 
+	init_runqueue (&ready_queue);
+
 
   /* Wait for the idle thread to initialize idle_thread. */
   sema_down (&idle_started);
