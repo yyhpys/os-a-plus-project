@@ -14,6 +14,9 @@
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
+	/*modified:start*/
+#include "threads/priority_queue.h"
+	/*modified:end*/
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -25,6 +28,7 @@
 static struct list ready_list;
 
 	/*modified:start*/
+static struct runqueue ready_queue;
 static struct list block_list;
 	/*modified:end*/
 
@@ -110,6 +114,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
 	/*modified:start*/
+  init_runqueue (&ready_queue);
   list_init (&block_list);
 	/*modified:end*/
   list_init (&all_list);
@@ -515,8 +520,9 @@ alloc_frame (struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run (void) 
 {
-  if (list_empty (&ready_list))
+  if (list_empty (&ready_list)){
     return idle_thread;
+  }
   else
     return list_entry (list_pop_front (&ready_list), struct thread, elem);
 }
