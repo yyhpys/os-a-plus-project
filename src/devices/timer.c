@@ -113,7 +113,6 @@ timer_sleep (int64_t ticks)
 {
   struct list *bl = blocklist ();
   struct thread *t = thread_current ();
-  printf("timer_sleep: <%i> blocked.\n",t->tid);
 
   ASSERT (intr_get_level () == INTR_ON);
 
@@ -278,7 +277,6 @@ wake_up_block_list(void)
 	struct thread *t;
 	int ctime,i;
 	tid_t threadid;
-	char *blo;
 	
 	ASSERT (intr_get_level () == INTR_OFF);
 
@@ -291,15 +289,11 @@ wake_up_block_list(void)
 		threadid = t->tid;
 		if (ctime> 0)
 		{
-			if(t->status==THREAD_BLOCKED)blo = "blocked";else blo="unblocked";
-			if(ctime%10==0)printf("<%i>   ctime = %i thread_status = %s\n",t->tid,ctime,blo);
 			t-> wake_time--;
 			list_push_back(bl,e);
 		}
 		else if (ctime== 0&&threadid!=0)
 		{
-			if(t->status==THREAD_BLOCKED)blo = "blocked";else blo="unblocked";
-			printf("tid = %i ctime = %i status = %s\n",t->tid,ctime,blo);
 			thread_unblock(t);
 		}
 		i++;
