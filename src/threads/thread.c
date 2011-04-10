@@ -123,6 +123,7 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+
  }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -133,12 +134,12 @@ thread_start (void)
   /* Create the idle thread. */
   struct semaphore idle_started;
   sema_init (&idle_started, 0);
+
+  init_runqueue (&ready_queue);
+
   thread_create ("idle", PRI_MIN, idle, &idle_started);
   /* Start preemptive thread scheduling. */
   intr_enable ();
- 
-  init_runqueue (&ready_queue);
-
 
   /* Wait for the idle thread to initialize idle_thread. */
   sema_down (&idle_started);
@@ -280,8 +281,8 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
 	/* modified (start) */
-  list_push_back (&ready_list, &t->elem);
-  //add_thread_a (&ready_queue, &t->elem);
+  //list_push_back (&ready_list, &t->elem);
+  add_thread_a (ready_queue, &t->elem);
 	/* modified (end) */
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -527,6 +528,7 @@ alloc_frame (struct thread *t, size_t size)
    empty.  (If the running thread can continue running, then it
    will be in the run queue)  If the run queue is empty, return
    idle_thread. */
+/*
 static struct thread *
 next_thread_to_run (void) 
 {
@@ -535,6 +537,18 @@ next_thread_to_run (void)
   }
   else
     return list_entry (list_pop_front (&ready_list), struct thread, elem);
+}*/
+static struct thread *
+next_thread_to_run (void) 
+{
+	/* modified (start) */
+  swap_array(ready_queue);
+
+  if (prio_array_empty ((ready_queue)->active))
+    return idle_thread;
+  else
+    return list_entry (pop_highest(ready_queue), struct thread, elem);
+	/* modified (end) */
 }
 
 /* Completes a thread switch by activating the new thread's page
