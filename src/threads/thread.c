@@ -204,6 +204,7 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
+  t->wake_time = 0;
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the "stack" 
@@ -243,7 +244,7 @@ void
 thread_block (void) 
 {
   ASSERT (!intr_context ());
-  /*ASSERT (intr_get_level () == INTR_OFF);*/
+  ASSERT (intr_get_level () == INTR_OFF);
 
   thread_current ()->status = THREAD_BLOCKED;
   schedule ();

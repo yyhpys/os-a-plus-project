@@ -113,11 +113,14 @@ timer_sleep (int64_t ticks)
 {
   struct list *bl = blocklist ();
   struct thread *t = thread_current ();
+  printf("timer_sleep: <%i> blocked.\n",t->tid);
 
   ASSERT (intr_get_level () == INTR_ON);
 
   list_push_back (bl, &t->elem);
   t->wake_time = ticks;
+
+  intr_disable ();
   thread_block ();
 }
 /*modified: end*/
@@ -272,21 +275,34 @@ wake_up_block_list(void)
 {
 	struct list_elem *e;
 	struct list *bl = blocklist ();
-	struct list *rl = readylist ();
 	struct thread *t;
+	int ctime,i;
+	tid_t threadid;
+	char *blo;
 	
 	ASSERT (intr_get_level () == INTR_OFF);
-	
-	for ( e = list_begin (bl); e != list_end (bl); e = list_next (e))
+
+	i=0;
+	while(i<list_size(bl))
 	{
+		e = list_pop_front(bl);
 		t = list_entry (e,struct thread,elem);
-		if (!(t->wake_time)) 
+		ctime = t->wake_time;
+		threadid = t->tid;
+		if (ctime> 0)
 		{
-			list_remove(e);
-			thread_unblock(t);
-			list_push_back(rl,e);
+			if(t->status==THREAD_BLOCKED)blo = "blocked";else blo="unblocked";
+			if(ctime%10==0)printf("<%i>   ctime = %i thread_status = %s\n",t->tid,ctime,blo);
+			t-> wake_time--;
+			list_push_back(bl,e);
 		}
-		else t->wake_time--;
+		else if (ctime== 0&&threadid!=0)
+		{
+			if(t->status==THREAD_BLOCKED)blo = "blocked";else blo="unblocked";
+			printf("tid = %i ctime = %i status = %s\n",t->tid,ctime,blo);
+			thread_unblock(t);
+		}
+		i++;
 	}
 }
 /*modified: end*/
