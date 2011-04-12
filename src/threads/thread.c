@@ -59,7 +59,7 @@ static long long kernel_ticks;  /* # of timer ticks in kernel threads. */
 static long long user_ticks;    /* # of timer ticks in user programs. */
 
 /* Scheduling. */
-#define TIME_SLICE 4            /* # of timer ticks to give each thread. */
+//#define TIME_SLICE 4            /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 
 /* If false (default), use round-robin scheduler.
@@ -349,8 +349,10 @@ thread_yield (void)
   old_level = intr_disable ();
   if (cur != idle_thread) 
   {
+	/* modified (start) */
     add_thread_a (ready_queue, &cur->elem);
     //list_push_back (&ready_list, &cur->elem);
+	/* modified (end) */
   }
   cur->status = THREAD_READY;
   schedule ();
