@@ -25,7 +25,7 @@
 
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
-static struct list ready_list;
+//static struct list ready_list;
 
 	/*modified:start*/
 static struct runqueue *ready_queue;
@@ -100,19 +100,13 @@ blocklist (void)
 	return &block_list;
 }
 
-struct list *
-readylist (void)
-{
-	return &ready_list;
-}
-
 void
 thread_init (void) 
 {
   ASSERT (intr_get_level () == INTR_OFF);
 
   lock_init (&tid_lock);
-  list_init (&ready_list);
+  //list_init (&ready_list);
 	/*modified:start*/
   list_init (&block_list);
 	/*modified:end*/
@@ -354,7 +348,10 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+  {
+    add_thread_a (ready_queue, &cur->elem);
+    //list_push_back (&ready_list, &cur->elem);
+  }
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
