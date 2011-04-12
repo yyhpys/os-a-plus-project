@@ -24,9 +24,11 @@ void init_prio_array(struct prio_array **array)
 {
 	int i;
 	*array = (struct prio_array *)malloc(sizeof(struct prio_array));
-	(*array)->queue = malloc(sizeof((*array)->queue));
 	for(i = 0; i < MAXSIZE; i++)
+	{
+		(*array)->queue[i] = (struct list *)malloc(sizeof(struct list));
 		list_init((*array)->queue[i]);
+	}
 	
 	(*array)->nr_active = 0;
 }
@@ -35,7 +37,7 @@ void add_thread_a(struct runqueue *rq, struct list_elem *e)
 {
 	struct thread *t = list_entry(e, struct thread,	elem);
 	int priority = t->priority;
-	list_push_back(&(*(rq->active->queue)[priority]), e);
+	list_push_back(rq->active->queue[priority], e);
 	(rq->active->nr_active)++;
 	//if(!(list_empty(rq->active->queue[priority])) && rq->active->bitmap[priority]==0)
 		rq->active->bitmap[priority] = 1;
@@ -45,7 +47,7 @@ void add_thread_e(struct runqueue *rq, struct list_elem *e)
 {
 	struct thread *t = list_entry(e, struct thread,	elem);
 	int priority = t->priority;
-	list_push_back(&(*(rq->expired->queue)[priority]), e);
+	list_push_back(rq->expired->queue[priority], e);
 	(rq->expired->nr_active)++;
 	//if(!(list_empty(rq->expired->queue[priority])) && rq->expired->bitmap[priority]==0)
 		rq->expired->bitmap[priority] = 1;
@@ -69,7 +71,7 @@ void remove_thread_a(struct runqueue *rq, struct list_elem *e)
 	int priority = t->priority;
 	list_remove(e);
 	(rq->active->nr_active)--;
-	if(list_empty(&(*(rq->active->queue)[priority])) && rq->active->bitmap[priority]==1)
+	if(list_empty(rq->active->queue[priority]) && rq->active->bitmap[priority]==1)
 		rq->active->bitmap[priority] = 0;	
 }
 
@@ -80,7 +82,7 @@ void remove_thread_e(struct runqueue *rq, struct list_elem *e)
 	int priority = t->priority;
 	list_remove(e);
 	(rq->expired->nr_active)--;
-	if(list_empty(&(*(rq->expired->queue)[priority])) && rq->expired->bitmap[priority]==1)
+	if(list_empty(rq->expired->queue[priority]) && rq->expired->bitmap[priority]==1)
 		rq->expired->bitmap[priority] = 0;	
 }
 
@@ -97,15 +99,17 @@ void remove_thread_t(struct runqueue *rq, struct thread *t)
 */
 
 /*Remove certain priority task from priority array*/
+/*
 struct list_elem *remove_certain_priority(struct runqueue *rq, int priority)
 {
 	(rq->active->nr_active)--;
-	if(list_empty(&(*(rq->active->queue)[priority])) && rq->active->bitmap[priority]==1)
+	if(list_empty(rq->active->queue[priority]) && rq->active->bitmap[priority]==1)
 		rq->active->bitmap[priority] = 0;	
-	return list_pop_front(&((*(rq->active->queue))[priority]));
-}
+	return list_pop_front(rq->active->queue[priority]);
+}*/
 
 /*Find the highest-priority task.*/
+/*
 struct list_elem *search_highest(struct runqueue *rq)
 {
 	int i;
@@ -114,8 +118,9 @@ struct list_elem *search_highest(struct runqueue *rq)
 		if(rq->active->bitmap[i] == 1)
 			break;
 	}
-	return list_begin(&(*(rq->active->queue)[i]));	
+	return list_begin(rq->active->queue[i]);	
 }
+*/
 /*Find the highest-priority task and pop it from priority array.*/
 struct list_elem *pop_highest(struct runqueue *rq)
 {
@@ -125,7 +130,14 @@ struct list_elem *pop_highest(struct runqueue *rq)
 		if(rq->active->bitmap[i] == 1)
 			break;
 	}
-	return list_pop_front(&(*(rq->active->queue)[i]));
+
+	struct list_elem *data = list_pop_front(rq->active->queue[i]);
+	(rq->active->nr_active)--;
+
+	if(list_empty(rq->active->queue[i]) && rq->active->bitmap[i]==1)
+		rq->active->bitmap[i] = 0;	
+
+	return data;
 }
 /*Check if priority array is empty.*/
 bool prio_array_empty(struct prio_array *arr)

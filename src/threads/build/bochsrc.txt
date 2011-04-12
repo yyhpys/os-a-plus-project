@@ -7,4 +7,4 @@ log: bochsout.txt
 panic: action=fatal
 gdbstub: enabled=1
 clock: sync=none, time0=0
-ata0-master: type=disk, path=/tmp/lYJ8IYrvWY.dsk, mode=flat, cylinders=1, heads=16, spt=63, translation=none
+ata0-master: type=disk, path=/tmp/o5E5TFFTgR.dsk, mode=flat, cylinders=1, heads=16, spt=63, translation=none

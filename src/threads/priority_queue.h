@@ -12,7 +12,7 @@ struct prio_array
 {
 	int nr_active;	//the number of tasks
 	unsigned long bitmap[MAXSIZE];
-	struct list (*queue)[MAXSIZE];
+	struct list *queue[MAXSIZE];
 };
 
 struct runqueue
