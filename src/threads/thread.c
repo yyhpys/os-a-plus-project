@@ -161,6 +161,7 @@ thread_tick (void)
 
   /* Enforce preemption. */
   if (++thread_ticks >= time_slice){
+printf("\n>>>time slice for tid = %i (priority = %i) expired\n",t->tid,t->priority);
     intr_yield_on_return ();
     remove_thread_a(ready_queue, &t->elem);
     add_thread_e(ready_queue, &t->elem);
@@ -541,12 +542,14 @@ static struct thread *
 next_thread_to_run (void) 
 {
 	/* modified (start) */
-  swap_array(ready_queue);
+  	if (prio_array_empty ((ready_queue)->active))
+    	{	
+		swap_array(ready_queue);
 
-  if (prio_array_empty ((ready_queue)->active))
-    return idle_thread;
-  else
-    return list_entry (pop_highest(ready_queue), struct thread, elem);
+		if (prio_array_empty ((ready_queue)->active))
+			{return idle_thread;}
+	}
+	return list_entry (pop_highest(ready_queue), struct thread, elem);
 	/* modified (end) */
 }
 
