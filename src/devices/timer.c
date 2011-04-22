@@ -120,7 +120,7 @@ timer_sleep (int64_t ticks)
   old_level = intr_disable ();
   list_push_back (bl, &t->elem);
   t->wake_time = ticks;
-  printf("thread tid = %i blocked with time = %i, current bl list size = %i\n",t->tid,t->wake_time,list_size(bl));
+  //printf("thread tid = %i blocked with time = %i, current bl list size = %i\n",t->tid,t->wake_time,list_size(bl));
   thread_block ();
   intr_set_level (old_level);
 }
@@ -282,30 +282,27 @@ wake_up_block_list(void)
 	tid_t threadid;
 	
 	//ASSERT (intr_get_level () == INTR_OFF);
-
+	old_level = intr_disable ();
 	i=0;
 	while(i<list_size(bl))
 	{
 		e = list_pop_front(bl);
 		t = list_entry (e,struct thread,elem);
-		//if (t->tid == 3) printf("tid = %i, remaining time = %i\n",t->tid,t->wake_time);		
 		ctime = t->wake_time;
 		threadid = t->tid;
-
-		old_level = intr_disable ();
-
 		if (ctime> 0)
 		{
 			t-> wake_time--;
 			list_push_back(bl,e);
 		}
-		else if (ctime== 0&&threadid!=0)
+		else if (ctime<= 0&&threadid!=0)
 		{
 			thread_unblock(t);
 		}
-		intr_set_level (old_level);
+		
 		i++;
 	}
+	intr_set_level (old_level);
 }
 /*modified: end*/
 
