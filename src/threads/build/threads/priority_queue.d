@@ -4,4 +4,4 @@ threads/priority_queue.o: ../../threads/priority_queue.c \
  ../../lib/kernel/stdio.h ../../lib/kernel/list.h \
  ../../threads/priority_queue.h ../../lib/kernel/bitmap.h \
  ../../lib/inttypes.h ../../threads/init.h ../../threads/malloc.h \
- ../../threads/synch.h ../../threads/thread.h
+ ../../threads/synch.h ../../threads/thread.h ../../threads/interrupt.h

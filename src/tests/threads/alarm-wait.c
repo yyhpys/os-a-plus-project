@@ -90,7 +90,7 @@ test_sleep (int thread_cnt, int iterations)
       t->iterations = 0;
 
       snprintf (name, sizeof name, "thread %d", i);
-      printf("thread created tid = %i with priority = %i (i=%i)\n",thread_create (name, PRI_DEFAULT, sleeper, t),PRI_DEFAULT,i);
+      thread_create (name, PRI_DEFAULT, sleeper, t);
     }
 
   /* Wait long enough for all the threads to finish. */

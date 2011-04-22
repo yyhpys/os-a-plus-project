@@ -26,7 +26,8 @@
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 //static struct list ready_list;
-
+int blah=0;
+int pp = 0;
 	/*modified:start*/
 static struct runqueue *ready_queue;
 static struct list block_list;
@@ -161,10 +162,7 @@ thread_tick (void)
 
   /* Enforce preemption. */
   if (++thread_ticks >= time_slice){
-printf("\n>>>time slice for tid = %i (priority = %i) expired\n",t->tid,t->priority);
     intr_yield_on_return ();
-    remove_thread_a(ready_queue, &t->elem);
-    add_thread_e(ready_queue, &t->elem);
   }
 }
 
@@ -253,8 +251,8 @@ thread_block (void)
 {
   ASSERT (!intr_context ());
   ASSERT (intr_get_level () == INTR_OFF);
-
-  thread_current ()->status = THREAD_BLOCKED;
+  struct thread *t = thread_current ();
+  t->status = THREAD_BLOCKED;
   schedule ();
 }
 
@@ -270,14 +268,15 @@ void
 thread_unblock (struct thread *t) 
 {
   enum intr_level old_level;
-
   ASSERT (is_thread (t));
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
 	/* modified (start) */
   //list_push_back (&ready_list, &t->elem);
+
   add_thread_a (ready_queue, &t->elem);
+
 	/* modified (end) */
   t->status = THREAD_READY;
   intr_set_level (old_level);
@@ -381,7 +380,7 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+  thread_current () -> priority = new_priority;
 }
 
 /* Returns the current thread's priority. */
@@ -510,7 +509,8 @@ init_thread (struct thread *t, const char *name, int priority)
   list_push_back (&all_list, &t->allelem);
 }
 
-/* Allocates a SIZE-byte frame at the top of thread T's stack and
+/* Allocates a SIZE-byte frame at the top of thread T's stack a
+nd
    returns a pointer to the frame's base. */
 static void *
 alloc_frame (struct thread *t, size_t size) 
@@ -542,14 +542,21 @@ static struct thread *
 next_thread_to_run (void) 
 {
 	/* modified (start) */
-  	if (prio_array_empty ((ready_queue)->active))
-    	{	
-		swap_array(ready_queue);
-
-		if (prio_array_empty ((ready_queue)->active))
-			{return idle_thread;}
+	struct thread *t;
+	int n,j=0,h=0;
+	for ( n = 0 ; n < 64 ; n ++ ) {
+		if (!list_empty(ready_queue->active->queue[n])) j = 1;
+		if (!list_empty(ready_queue->expired->queue[n])) h = 1;
 	}
-	return list_entry (pop_highest(ready_queue), struct thread, elem);
+  	if (j==0&&h==0) t = idle_thread;
+	else if (j == 0) 
+	{
+		swap_array(ready_queue);
+		t =  list_entry (pop_highest(ready_queue), struct thread, elem);
+	}
+	else t =  list_entry (pop_highest(ready_queue), struct thread, elem);
+	if (t->tid==1) pp++;
+	return t;
 	/* modified (end) */
 }
 

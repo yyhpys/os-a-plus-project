@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <list.h>
 #include "threads/priority_queue.h"
+#include "threads/interrupt.h"
 #define MAXSIZE 64
 
 /*Initialize runqueue.*/
@@ -35,20 +36,26 @@ void init_prio_array(struct prio_array **array)
 /*Add thread to active array. Get the 2nd argument for list_elem.*/
 void add_thread_a(struct runqueue *rq, struct list_elem *e)
 {
-	struct thread *t = list_entry(e, struct thread,	elem);
+	ASSERT(intr_get_level () == INTR_OFF);
+
+	struct thread *t = list_entry(e, struct thread,elem);
 	int priority = t->priority;
 	list_push_back(rq->active->queue[priority], e);
 	(rq->active->nr_active)++;
+	t->activity = ACTIVE;
 	if(!(list_empty(rq->active->queue[priority])))
 		rq->active->bitmap[priority] = 1;
 }
 /*Add thread to expired array. Get the 2nd argument for list_elem.*/
 void add_thread_e(struct runqueue *rq, struct list_elem *e)
 {
+	ASSERT(intr_get_level () == INTR_OFF);
+
 	struct thread *t = list_entry(e, struct thread,	elem);
 	int priority = t->priority;
 	list_push_back(rq->expired->queue[priority], e);
 	(rq->expired->nr_active)++;
+	t->activity = EXPIRED;
 	if(!(list_empty(rq->expired->queue[priority])))
 		rq->expired->bitmap[priority] = 1;
 }
@@ -67,6 +74,8 @@ void add_thread_t(struct runqueue *rq, struct thread *t)
 /*Remove thread from active array. Get the 2nd argument for list_elem.*/
 void remove_thread_a(struct runqueue *rq, struct list_elem *e)
 {
+	ASSERT(intr_get_level () == INTR_OFF);
+
 	struct thread *t = list_entry(e, struct thread, elem);
 	int priority = t->priority;
 	list_remove(e);
@@ -78,6 +87,8 @@ void remove_thread_a(struct runqueue *rq, struct list_elem *e)
 /*Remove thread from expired array. Get the 2nd argument for list_elem.*/
 void remove_thread_e(struct runqueue *rq, struct list_elem *e)
 {
+	ASSERT(intr_get_level () == INTR_OFF);
+
 	struct thread *t = list_entry(e, struct thread, elem);
 	int priority = t->priority;
 	list_remove(e);
@@ -124,6 +135,7 @@ struct list_elem *search_highest(struct runqueue *rq)
 /*Find the highest-priority task and pop it from priority array.*/
 struct list_elem *pop_highest(struct runqueue *rq)
 {
+	struct thread *t;
 	int i;
 	ASSERT (!prio_array_empty(rq->active));
 	for(i = MAXSIZE-1; i > -1; i--){
@@ -132,6 +144,7 @@ struct list_elem *pop_highest(struct runqueue *rq)
 	}
 
 	struct list_elem *data = list_pop_front(rq->active->queue[i]);
+	t = list_entry(data,struct thread,elem);
 	(rq->active->nr_active)--;
 
 	if(list_empty(rq->active->queue[i]))
