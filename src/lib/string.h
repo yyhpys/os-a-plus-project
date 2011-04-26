@@ -24,7 +24,8 @@ size_t strlcpy (char *, const char *, size_t);
 size_t strlcat (char *, const char *, size_t);
 char *strtok_r (char *, const char *, char **);
 size_t strnlen (const char *, size_t);
-
+void str_catchar (char *, size_t, char, int);
+void str_cat (char *, size_t, char *);
 /* Try to be helpful. */
 #define strcpy dont_use_strcpy_use_strlcpy
 #define strncpy dont_use_strncpy_use_strlcpy
