@@ -1,6 +1,7 @@
 #include "userprog/process.h"
 #include <debug.h>
 #include <inttypes.h>
+#include <list.h>
 #include <round.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +22,8 @@
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
+int blank = 0, fp = 0;
+uint32_t *frame_pointer;
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
@@ -45,8 +48,34 @@ process_execute (const char *file_name)
   return tid;
 }
 
+/* added: pushes data by 1 byte */
+void stack_push (char *data,int data_size,uint32_t *esp)
+{
+	char** stack_pointer = (char **)esp;
+	int i;
+
+	*stack_pointer = *stack_pointer - data_size;
+	*esp = *stack_pointer;
+	for ( i = 0 ; i < data_size ; i++ )
+	{
+		**stack_pointer = data[i];
+		++*stack_pointer;
+	}
+}
+
+/* added: pushes data by 4 bytes */
+void stack_push_uint (uint32_t data, uint32_t *esp)
+{
+	uint32_t** stack_pointer = (uint32_t **) esp;
+
+	*(--*stack_pointer) = data;
+
+	*esp = *stack_pointer;
+}
+
 /* A thread function that loads a user process and starts it
    running. */
+
 static void
 start_process (void *file_name_)
 {
@@ -59,6 +88,7 @@ start_process (void *file_name_)
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
+
   success = load (file_name, &if_.eip, &if_.esp);
 
   /* If load failed, quit. */
@@ -195,7 +225,7 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-static bool setup_stack (void **esp);
+static bool setup_stack (void **esp, char *file_name);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -206,7 +236,7 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
    and its initial stack pointer into *ESP.
    Returns true if successful, false otherwise. */
 bool
-load (const char *file_name, void (**eip) (void), void **esp) 
+load (const char *filename, void (**eip) (void), void **esp) 
 {
   struct thread *t = thread_current ();
   struct Elf32_Ehdr ehdr;
@@ -214,6 +244,9 @@ load (const char *file_name, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
+	char *ptr,*file_name;
+	
+	file_name = strtok_r(filename," ",&ptr);
 
   /* Allocate and activate page directories. */
   t->pagedir = pagedir_create ();
@@ -302,7 +335,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack (esp,filename))
     goto done;
 
   /* Start address. */
@@ -427,17 +460,78 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp) 
+setup_stack (void **esp, char *file_name) 
 {
   uint8_t *kpage;
   bool success = false;
+
+	int i,j,toksize[100]={0},sum=0,temp;
+	uint32_t tokaddr[100]={0},start_addr=0xc0000000,current_addr=0xc0000000,tempaddr;
+	char null = 0;
+	char dest[128],*str,*token,*ptr,*filename;
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
+	{
         *esp = PHYS_BASE;
+	/* argument stacking */
+	/* 1.creating argv[][] and combining them into one chunk */
+	i = 0;
+	str = file_name;
+	while (1)
+	{
+		token = strtok_r(str," ",&ptr);
+		if (i==0) filename = token;
+		if (token==0) break;
+
+		toksize[i] = strlen(token)+1;
+		str_cat(dest,sum,token);
+		sum += toksize[i];
+
+		current_addr -= toksize[i];
+
+		i++;
+		str = NULL;
+	}
+	j=i-1;
+	i=0;
+	tempaddr = start_addr;
+		/* address management */
+	while (1)
+	{
+		tempaddr -= toksize[j];
+		tokaddr[i]=tempaddr;
+
+		if (j==0) break;
+		i++;
+		j--;
+	}
+	str_catchar(dest,sum,null,current_addr%4);
+	temp = current_addr%4;
+	current_addr = current_addr - (uint32_t)temp;
+
+	/* 2. pushing the chunk */
+	stack_push(dest,(int)((int)start_addr - (int)current_addr),esp);
+	
+	/* 3. pushing the address */
+	current_addr -= (i+1)*4;
+	for ( i=0; tokaddr[i]!=0 ; i++ )
+	{
+		stack_push_uint (tokaddr[i],esp);
+	}
+	
+	/* 4. pushing argv */
+	stack_push_uint ((uint32_t)current_addr,esp);
+        *esp = PHYS_BASE - 12;
+	/* 5. pushing argc */
+	stack_push_uint ((uint32_t)i,esp);
+
+	/* 6. pushing fake return address */
+	stack_push_uint (0,esp);
+	}
       else
         palloc_free_page (kpage);
     }

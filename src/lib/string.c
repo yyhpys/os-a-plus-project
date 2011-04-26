@@ -373,3 +373,27 @@ strlcat (char *dst, const char *src, size_t size)
   return src_len + dst_len;
 }
 
+/*added*/
+
+void str_catchar (char* dest, size_t dest_len, char c,int count)
+{
+	int i;
+
+	for ( i = 0 ; i < (count+dest_len+1) ; i++)
+	{
+		if ( i <= dest_len ) dest[i] = dest[i];
+		else dest[i] = c;
+	}
+}
+
+void str_cat (char* dest,size_t size_dest, char* src)
+{
+	int i;
+	size_t src_len = strlen(src);
+
+	for ( i = 0 ; i < (src_len+size_dest+1) ; i++ )
+	{
+		if ( i < (size_dest) ) dest[i] = dest[i];
+		else dest[i] = src[i-size_dest];
+	}
+}
