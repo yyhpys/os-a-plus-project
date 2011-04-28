@@ -32,6 +32,9 @@ int pp = 0;
 static struct runqueue *ready_queue;
 static struct list block_list;
 	/*modified:end*/
+	/*prj3: start*/
+static struct list wait_list;
+	/*prj3: end*/
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -94,12 +97,39 @@ static tid_t allocate_tid (void);
    It is not safe to call thread_current() until this function
    finishes. */
 
-/*function that returns block and ready list address*/
+/*prj2: start*/
+/*function that returns block list address*/
 struct list *
 blocklist (void)
 { 
 	return &block_list;
 }
+/*prj2: end*/
+/*prj3: start*/
+/*function that returns wait list address*/
+struct list *
+waitlist (void)
+{ 
+	return &wait_list;
+}
+
+/*function that returns thread from tid*/
+struct thread *
+get_thread_with_tid (tid_t tid)
+{ 
+  struct list_elem *e;
+
+  for (e = list_begin (&all_list); e != list_end (&all_list);
+       e = list_next (e)) {
+    struct thread *t = list_entry (e, struct thread, allelem);
+
+    if(t->tid == tid)
+	return t;  
+  }
+
+  return NULL;
+}
+/*prj3: end*/
 
 void
 thread_init (void) 
@@ -111,6 +141,11 @@ thread_init (void)
 	/*modified:start*/
   list_init (&block_list);
 	/*modified:end*/
+	/*prj3: start*/
+  list_init (&wait_list);
+  list_init (&(initial_thread->child_list));
+	/*prj3: end*/
+
   list_init (&all_list);
 
   /* Set up a thread structure for the running thread. */
@@ -118,6 +153,7 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+
 
  }
 
@@ -507,6 +543,10 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
+
+  /*prj3: start*/
+  list_init(&(t->child_list));
+  /*prj3: end*/
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack a
