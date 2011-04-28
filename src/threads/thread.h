@@ -101,6 +101,12 @@ struct thread
     int64_t wake_time;
     /*modified: end*/
 
+    /*prj3: start*/
+    struct thread* parent_t;
+    struct list child_list;
+    struct list_elem childelem;	/* List element for child list */
+    /*prj3: end*/
+
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
@@ -118,7 +124,15 @@ struct thread
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
+  /*prj2: start*/
 struct list *blocklist (void);
+  /*prj2: end*/
+  /*prj3: start*/
+struct list *waitlist (void);
+
+struct thread *get_thread_with_tid (tid_t tid);
+  /*prj3: end*/
+
 void thread_init (void);
 void thread_start (void);
 

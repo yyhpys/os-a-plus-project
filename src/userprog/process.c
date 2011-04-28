@@ -44,11 +44,21 @@ process_execute (const char *file_name)
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
-    palloc_free_page (fn_copy); 
+    palloc_free_page (fn_copy);
+  else {
+    /*prj3: start*/
+    struct thread *current_t = thread_current();
+    struct thread *child_t = get_thread_with_tid (tid);
+
+    child_t->parent_t = current_t;
+    list_push_back(&(current_t->child_list), &(child_t->childelem));
+    /*prj3: end*/
+  }
+
   return tid;
 }
 
-/* added: pushes data by 1 byte */
+/* prj3: pushes data by 1 byte */
 void stack_push (char *data,int data_size,uint32_t *esp)
 {
 	char** stack_pointer = (char **)esp;
@@ -63,7 +73,7 @@ void stack_push (char *data,int data_size,uint32_t *esp)
 	}
 }
 
-/* added: pushes data by 4 bytes */
+/* prj3: pushes data by 4 bytes */
 void stack_push_uint (uint32_t data, uint32_t *esp)
 {
 	uint32_t** stack_pointer = (uint32_t **) esp;
@@ -73,9 +83,28 @@ void stack_push_uint (uint32_t data, uint32_t *esp)
 	*esp = *stack_pointer;
 }
 
+/*prj3: start*/
+/*function that returns wait_table from child_tid*/
+struct wait_table *
+get_wait_table_with_child_tid (tid_t tid)
+{ 
+  struct list_elem *e;
+  struct list *wait_list = waitlist();
+
+  for (e = list_begin (wait_list); e != list_end (wait_list);
+       e = list_next (e)) {
+    struct wait_table *wtable = list_entry (e, struct wait_table, waitelem);
+
+    if(wtable->child_tid == tid)
+	return wtable;
+  }
+
+  return NULL;
+}
+/*prj3: end*/
+
 /* A thread function that loads a user process and starts it
    running. */
-
 static void
 start_process (void *file_name_)
 {
@@ -118,7 +147,67 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
+  enum intr_level old_level;
+
+  struct list *wait_list = waitlist();
+
+  struct thread *current_t = thread_current();
+  struct thread *child_t = get_thread_with_tid (child_tid);
+
+  if(current_t->tid != child_t->parent_t->tid)
+    return -1;
+
+  struct wait_table *wtable = malloc(sizeof(struct wait_table));
+  wtable->self_tid = current_t->tid;
+  wtable->child_tid = child_tid;
+  wtable->child_status = CHILD_ACTIVE;
+
+  list_push_back(wait_list, &wtable->waitelem);
+
+  for(;;) {
+    if(wtable->child_status == CHILD_ZOMBIE) {
+      int return_status = wtable->return_status;
+
+      list_remove(&wtable->waitelem);
+      free(wtable);
+
+      return return_status;
+    }
+
+    if(list_size(&(current_t->child_list)) == 0) {
+      list_remove(&wtable->waitelem);
+      free(wtable);
+
+      return -1;
+    }
+
+    old_level = intr_disable();
+    thread_block();
+    intr_set_level(old_level);
+  }
+
   return -1;
+}
+
+/* prj3: exit with status value */
+int
+process_exit_with_status (int status) {
+  struct thread *current_t = thread_current();
+  struct thread *parent_t = current_t->parent_t;
+
+  struct wait_table *wtable = get_wait_table_with_child_tid(current_t->tid);
+
+  if(wtable == NULL) {
+    wtable->return_status = status;
+    wtable->child_status = CHILD_ZOMBIE;
+
+    if(parent_t->tid == wtable->self_tid)
+      thread_unblock(parent_t);
+  }
+  
+  printf("exit status: %d", status);
+
+  thread_exit(); //thread_exit() call process_exit()
 }
 
 /* Free the current process's resources. */

@@ -18,5 +18,21 @@ static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
   printf ("system call!\n");
-  thread_exit ();
+/*
+  int syscall_nr;
+
+  syscall_nr=0;
+
+  switch(syscall_nr) {
+    case SYS_EXIT:
+    case SYS_EXEC:
+    case SYS_WAIT:
+    case SYS_CREATE:
+    case SYS_REMOVE:
+    case SYS_OPEN:
+    case SYS_FILESIZE:
+    case SYS_READ:
+    case SYS_WRITE:
+	break;
+  }*/
 }
