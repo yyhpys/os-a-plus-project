@@ -83,10 +83,9 @@ void stack_read_string (char *output,int i, void **esp)
 /* prj3: reads data argv[i] */
 void stack_read (uint32_t *data,int i,void **esp)
 {
-	uint32_t ***int_pointer = (uint32_t ***) esp;
-	*int_pointer += 2;
-	**int_pointer += i;
-	*data = ***int_pointer;
+	uint32_t **pointer = (uint32_t **) esp;
+	*pointer += i+1;
+	*data = **pointer;
 }
 
 /* prj3: pushes data by 1 byte */
@@ -228,7 +227,7 @@ process_exit_with_status (int status) {
 
   struct wait_table *wtable = get_wait_table_with_child_tid(current_t->tid);
 
-  if(wtable == NULL) {
+  if(wtable != NULL) {
     wtable->return_status = status;
     wtable->child_status = CHILD_ZOMBIE;
 
@@ -236,7 +235,7 @@ process_exit_with_status (int status) {
       thread_unblock(parent_t);
   }
   
-  printf("exit status: %d", status);
+  printf("exit status: %d\n", status);
 
   thread_exit(); //thread_exit() call process_exit()
 }
