@@ -18,9 +18,10 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/malloc.h"
 
 static thread_func start_process NO_RETURN;
-static bool load (const char *cmdline, void (**eip) (void), void **esp);
+static bool load (char *cmdline, void (**eip) (void), void **esp);
 
 int blank = 0, fp = 0;
 uint32_t *frame_pointer;
@@ -58,14 +59,44 @@ process_execute (const char *file_name)
   return tid;
 }
 
+/* prj3: reads data *(argv[i]) */
+void stack_read_string (char *output,int i, void **esp)
+{
+	char**** argv_pointer = (char ****) esp;
+	int j;
+	
+	/* locating argv */
+	*argv_pointer += 8;
+	/* locating &argv[i] */
+	**argv_pointer += 4*i;
+	/* retrieving argv[i][j] */
+	j=0;
+	while (1)
+	{
+		output[j] = ****argv_pointer;
+		if ((****argv_pointer)==0) break;
+		j++;
+		++***argv_pointer;
+	}
+}
+
+/* prj3: reads data argv[i] */
+void stack_read (uint32_t *data,int i,void **esp)
+{
+	uint32_t ***int_pointer = (uint32_t ***) esp;
+	*int_pointer += 2;
+	**int_pointer += i;
+	*data = ***int_pointer;
+}
+
 /* prj3: pushes data by 1 byte */
-void stack_push (char *data,int data_size,uint32_t *esp)
+void stack_push (char *data,int data_size,void **esp)
 {
 	char** stack_pointer = (char **)esp;
 	int i;
 
 	*stack_pointer = *stack_pointer - data_size;
-	*esp = *stack_pointer;
+	*esp = (void *) *stack_pointer;
 	for ( i = 0 ; i < data_size ; i++ )
 	{
 		**stack_pointer = data[i];
@@ -74,13 +105,13 @@ void stack_push (char *data,int data_size,uint32_t *esp)
 }
 
 /* prj3: pushes data by 4 bytes */
-void stack_push_uint (uint32_t data, uint32_t *esp)
+void stack_push_uint (uint32_t data, void **esp)
 {
-	uint32_t** stack_pointer = (uint32_t **) esp;
+	uint32_t **stack_pointer = (uint32_t **) esp;
 
 	*(--*stack_pointer) = data;
 
-	*esp = *stack_pointer;
+	*esp = (void *) *stack_pointer;
 }
 
 /*prj3: start*/
@@ -325,7 +356,7 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
    and its initial stack pointer into *ESP.
    Returns true if successful, false otherwise. */
 bool
-load (const char *filename, void (**eip) (void), void **esp) 
+load (char *filename, void (**eip) (void), void **esp) 
 {
   struct thread *t = thread_current ();
   struct Elf32_Ehdr ehdr;
