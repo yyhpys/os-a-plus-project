@@ -83,9 +83,9 @@ void stack_read_string (char *output,int i, void **esp)
 /* prj3: reads data argv[i] */
 void stack_read (uint32_t *data,int i,void **esp)
 {
-	uint32_t **pointer = (uint32_t **) esp;
-	*pointer += i+1;
-	*data = **pointer;
+	uint32_t *pointer = *((uint32_t **) esp);
+	pointer += i+1;
+	*data = *pointer;
 }
 
 /* prj3: pushes data by 1 byte */
@@ -363,9 +363,9 @@ load (char *filename, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
-	char *ptr,*file_name;
+	char *ptr,file_name[100];
 	
-	file_name = strtok_r(filename," ",&ptr);
+	strtok_n(file_name,filename,' ');
 
   /* Allocate and activate page directories. */
   t->pagedir = pagedir_create ();
@@ -597,7 +597,8 @@ setup_stack (void **esp, char *file_name)
 	{
         *esp = PHYS_BASE;
 	/* argument stacking */
-	/* 1.creating argv[][] and combining them into one chunk */
+	/* 1.creating ar(...ld/../../lib/string.c:408)
+0xc010a6bb: lgv[][] and combining them into one chunk */
 	i = 0;
 	str = file_name;
 	while (1)
@@ -634,7 +635,12 @@ setup_stack (void **esp, char *file_name)
 
 	/* 2. pushing the chunk */
 	stack_push(dest,(int)((int)start_addr - (int)current_addr),esp);
-	
+	printf("stackpush2 = [");
+	for ( i=0; i<(start_addr - current_addr) ; i++)
+	{
+	 printf("%x",(*(char **)esp)[i]);
+	}
+	printf("]\n");
 	/* 3. pushing the address */
 	current_addr -= (i+1)*4;
 	for ( i=0; tokaddr[i]!=0 ; i++ )

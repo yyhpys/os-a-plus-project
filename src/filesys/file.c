@@ -1,15 +1,8 @@
+
 #include "filesys/file.h"
-#include <debug.h>
-#include "filesys/inode.h"
-#include "threads/malloc.h"
 
 /* An open file. */
-struct file 
-  {
-    struct inode *inode;        /* File inode. */
-    off_t pos;                  /* Current position. */
-    bool deny_write;            /* Has file_deny_write() been called? */
-  };
+
 
 /* Open a file for the given INODE, of which it takes ownership,
    and returns the new file.  Returns a null pointer if an
@@ -105,7 +98,8 @@ file_write (struct file *file, const void *buffer, off_t size)
    which may be less than SIZE if end of file is reached.
    (Normally we'd grow the file in that case, but file growth is
    not yet implemented.)
-   The file's current position is unaffected. */
+   The file's current position is unaffec
+#include "filesys/file.h"ted. */
 off_t
 file_write_at (struct file *file, const void *buffer, off_t size,
                off_t file_ofs) 
