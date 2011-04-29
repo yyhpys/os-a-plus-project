@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "filesys/file.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -77,6 +78,7 @@ static void idle (void *aux UNUSED);
 static struct thread *running_thread (void);
 static struct thread *next_thread_to_run (void);
 static void init_thread (struct thread *, const char *name, int priority);
+static void init_fd_table(struct fd_table);
 static bool is_thread (struct thread *) UNUSED;
 static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
@@ -130,6 +132,16 @@ get_thread_with_tid (tid_t tid)
   return NULL;
 }
 /*prj3: end*/
+
+static void
+init_fd_table(struct fd_table table)
+{
+	int fd = 0;
+	for(fd = 0; fd < FDTMAX; fd++){
+		table.open_flag[fd] = 0;
+		table.file_pointer[fd] = NULL;	
+	}
+}
 
 void
 thread_init (void) 
@@ -543,7 +555,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
-
+  init_fd_table(t->u_open_files);
   /*prj3: start*/
   list_init(&(t->child_list));
   /*prj3: end*/

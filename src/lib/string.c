@@ -397,3 +397,19 @@ void str_cat (char* dest,size_t size_dest, char* src)
 		else dest[i] = src[i-size_dest];
 	}
 }
+
+void
+strtok_n (char *dest, char *src, char key) 
+{
+	int i = 0;
+	while(1)
+	{
+		if (src[i]==' ') 
+		{
+			dest[i]='\0';
+			break;
+		}
+		dest[i] = src[i];
+		i++;
+	}
+}
