@@ -89,29 +89,20 @@ void stack_read (uint32_t *data,int i,void **esp)
 }
 
 /* prj3: pushes data by 1 byte */
-void stack_push (char *data,int data_size,void **esp)
+void stack_push (void *data, int bytelength, void **esp)
 {
-	char** stack_pointer = (char **)esp;
-	int i;
-
-	*stack_pointer = *stack_pointer - data_size;
-	*esp = (void *) *stack_pointer;
-	for ( i = 0 ; i < data_size ; i++ )
-	{
-		**stack_pointer = data[i];
-		++*stack_pointer;
-	}
+  int i=0;
+  char *bytedata = data,*pointer = *((char **)esp);
+  while(1)
+  {
+    pointer--;
+    *pointer = bytedata[bytelength-i-1];
+    if ( i+1 == bytelength ) break;
+    i++;
+  }  
+  *esp = (void *)pointer;
 }
-
-/* prj3: pushes data by 4 bytes */
-void stack_push_uint (uint32_t data, void **esp)
-{
-	uint32_t **stack_pointer = (uint32_t **) esp;
-
-	*(--*stack_pointer) = data;
-
-	*esp = (void *) *stack_pointer;
-}
+  
 
 /*prj3: start*/
 /*function that returns wait_table from child_tid*/
@@ -584,10 +575,9 @@ setup_stack (void **esp, char *file_name)
   uint8_t *kpage;
   bool success = false;
 
-	int i,j,toksize[100]={0},sum=0,temp;
-	uint32_t tokaddr[100]={0},start_addr=0xc0000000,current_addr=0xc0000000,tempaddr;
-	char null = 0;
-	char dest[128],*str,*token,*ptr,*filename;
+  uint32_t tokaddr[100],temp;
+  char *ptr,*str,*token;
+  int j,i=0;
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
   if (kpage != NULL) 
@@ -597,66 +587,41 @@ setup_stack (void **esp, char *file_name)
 	{
         *esp = PHYS_BASE;
 	/* argument stacking */
-	/* 1.creating ar(...ld/../../lib/string.c:408)
-0xc010a6bb: lgv[][] and combining them into one chunk */
-	i = 0;
-	str = file_name;
-	while (1)
-	{
-		token = strtok_r(str," ",&ptr);
-		if (i==0) filename = token;
-		if (token==0) break;
+  /* start */
 
-		toksize[i] = strlen(token)+1;
-		str_cat(dest,sum,token);
-		sum += toksize[i];
-
-		current_addr -= toksize[i];
-
-		i++;
-		str = NULL;
-	}
-	j=i-1;
-	i=0;
-	tempaddr = start_addr;
-		/* address management */
-	while (1)
-	{
-		tempaddr -= toksize[j];
-		tokaddr[i]=tempaddr;
-
-		if (j==0) break;
-		i++;
-		j--;
-	}
-	str_catchar(dest,sum,null,current_addr%4);
-	temp = current_addr%4;
-	current_addr = current_addr - (uint32_t)temp;
-
-	/* 2. pushing the chunk */
-	stack_push(dest,(int)((int)start_addr - (int)current_addr),esp);
-	printf("stackpush2 = [");
-	for ( i=0; i<(start_addr - current_addr) ; i++)
-	{
-	 printf("%x",(*(char **)esp)[i]);
-	}
-	printf("]\n");
-	/* 3. pushing the address */
-	current_addr -= (i+1)*4;
-	for ( i=0; tokaddr[i]!=0 ; i++ )
-	{
-		stack_push_uint (tokaddr[i],esp);
-	}
-	
-	/* 4. pushing argv */
-	stack_push_uint ((uint32_t)current_addr,esp);
-        *esp = PHYS_BASE - 12;
-	/* 5. pushing argc */
-	stack_push_uint ((uint32_t)i,esp);
-
-	/* 6. pushing fake return address */
-	stack_push_uint (0,esp);
-	}
+  str = file_name;
+  while(1)
+  {
+    token=strtok_r(str,' ',&ptr);
+    if(token[0]==NULL) break;
+    stack_push((void *)token,strlen(token),esp);
+    tokaddr[i]=*esp;
+    
+    i++;
+    str=NULL;
+  }
+  j=i;
+  
+  /* pushing blank */
+  for (j=0;i<4;j++) str[j]=0;
+  stack_push((void *)str,(int)(*esp)%4,esp);
+  
+  /* pushing argv[j]=0 */
+  stack_push((void *)str,4,esp);
+  
+  /* pushing rest */
+  while(1)
+  {
+    stack_push((void *)&tokaddr[i],4,esp);
+    if (i==0)break;
+    i--;
+  }
+  temp = (uint32_t)*esp;
+  stack_push((void *)&temp,4,esp);
+  stack_push((void *)&j,4,esp);
+  stack_push((void *)str,4,esp);
+  /*end*/
+		}
       else
         palloc_free_page (kpage);
     }
