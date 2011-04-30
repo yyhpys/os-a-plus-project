@@ -45,7 +45,6 @@ static int file_to_fd(struct file * fp)
 static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
-  printf ("system call!\n");
   void **esp_address = &(f->esp);
 
   int syscall_nr;

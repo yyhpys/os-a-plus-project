@@ -59,17 +59,17 @@ process_execute (const char *file_name)
   return tid;
 }
 
-/* prj3: reads data *(argv[i]) */
+/* prj3: reads data *(argv[i]) 
 void stack_read_string (char *output,int i, void **esp)
 {
 	char**** argv_pointer = (char ****) esp;
 	int j;
 	
-	/* locating argv */
+	//locating argv 
 	*argv_pointer += 8;
-	/* locating &argv[i] */
+	// locating &argv[i] 
 	**argv_pointer += 4*i;
-	/* retrieving argv[i][j] */
+	// retrieving argv[i][j] 
 	j=0;
 	while (1)
 	{
@@ -79,6 +79,7 @@ void stack_read_string (char *output,int i, void **esp)
 		++***argv_pointer;
 	}
 }
+*/
 
 /* prj3: reads data argv[i] */
 void stack_read (uint32_t *data,int i,void **esp)
@@ -95,9 +96,9 @@ void stack_push (void *data, int bytelength, void **esp)
   char *bytedata = data,*pointer = *((char **)esp);
   while(1)
   {
-    pointer--;
+    pointer -= 1;
     *pointer = bytedata[bytelength-i-1];
-    if ( i+1 == bytelength ) break;
+    if ( bytelength-i-1 == 0 ) break;
     i++;
   }  
   *esp = (void *)pointer;
@@ -226,7 +227,7 @@ process_exit_with_status (int status) {
       thread_unblock(parent_t);
   }
   
-  printf("exit status: %d\n", status);
+  //printf("exit status: %d\n", status);
 
   thread_exit(); //thread_exit() call process_exit()
 }
@@ -354,7 +355,7 @@ load (char *filename, void (**eip) (void), void **esp)
   off_t file_ofs;
   bool success = false;
   int i;
-	char *ptr,file_name[100];
+	char file_name[100];
 	
 	strtok_n(file_name,filename,' ');
 
@@ -576,8 +577,8 @@ setup_stack (void **esp, char *file_name)
   bool success = false;
 
   uint32_t tokaddr[100],temp;
-  char *ptr,*str,*token;
-  int j,i=0;
+  char *ptr,*str,*token,blank[4];
+  int size,j,i=0;
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
   if (kpage != NULL) 
@@ -592,34 +593,33 @@ setup_stack (void **esp, char *file_name)
   str = file_name;
   while(1)
   {
-    token=strtok_r(str,' ',&ptr);
-    if(token[0]==NULL) break;
-    stack_push((void *)token,strlen(token),esp);
-    tokaddr[i]=*esp;
+    token=strtok_r(str," ",&ptr);
+    if(token[0]<=4) break;
+    stack_push((void *)token,(strlen(token)+1),esp);
+    tokaddr[i]=(uint32_t)*esp;
     
     i++;
     str=NULL;
   }
-  j=i;
-  
+  size=i;
+
   /* pushing blank */
-  for (j=0;i<4;j++) str[j]=0;
-  stack_push((void *)str,(int)(*esp)%4,esp);
-  
+  for (j=0;j<4;j++) blank[j]=0;
+  stack_push((void *)blank,(int)(((uint32_t)(*esp))%4),esp);
   /* pushing argv[j]=0 */
-  stack_push((void *)str,4,esp);
+  stack_push((void *)blank,4,esp);
   
   /* pushing rest */
   while(1)
   {
-    stack_push((void *)&tokaddr[i],4,esp);
-    if (i==0)break;
+    stack_push((void *)&tokaddr[i-1],4,esp);
+    if (i==1)break;
     i--;
   }
   temp = (uint32_t)*esp;
   stack_push((void *)&temp,4,esp);
-  stack_push((void *)&j,4,esp);
-  stack_push((void *)str,4,esp);
+  stack_push((void *)&size,4,esp);
+  stack_push((void *)blank,4,esp);
   /*end*/
 		}
       else
