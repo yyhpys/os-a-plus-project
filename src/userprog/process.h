@@ -12,10 +12,8 @@ void process_exit (void);
 void process_activate (void);
 
 /*prj3: start*/
-void stack_read_string (char *,int, void **);
 void stack_read (uint32_t *,int,void **);
-void stack_push (char *,int,void **);
-void stack_push_uint (uint32_t,void **);
+void stack_push (void *,int,void **);
 
 struct wait_table *get_wait_table_with_child_tid (tid_t);
 
