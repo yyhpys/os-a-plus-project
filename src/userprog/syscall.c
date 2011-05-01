@@ -30,7 +30,7 @@ static struct file * fd_to_file(int fd)
 static int file_to_fd(struct file * fp)
 {
 	int i;
-	int (*flag)[FDTMAX] = &(thread_current()->u_open_files.open_flag[FDTMAX]);
+	int (*flag)[FDTMAX] = &(thread_current()->u_open_files.open_flag);
 	for(i = 3; i < FDTMAX; i++){
 		if(*flag[i]==0)
 			break;
@@ -46,27 +46,21 @@ static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
   void **esp_address = &(f->esp);
-
-  int syscall_nr;
-  stack_read (&syscall_nr,-1,esp_address);
-
-  int int_arg;
-  char *char_arg;
-  tid_t tid_arg;
+  int syscall_nr = **((int **)esp_address);
   uint32_t arg1=0,arg2=0,arg3=0;
 
   switch(syscall_nr) {
     case SYS_EXIT:
-	stack_read (&int_arg,0,esp_address);
-	process_exit_with_status(int_arg);
+	stack_read (&arg1,0,esp_address);
+	process_exit_with_status((int)arg1);
 	break;
     case SYS_EXEC:
-	stack_read (&char_arg,0,esp_address);
-	f->eax = process_execute (char_arg);
+	stack_read (&arg1,0,esp_address);
+	f->eax = process_execute ((char *)arg1);
 	break;
     case SYS_WAIT:
-	stack_read (&tid_arg,0,esp_address);
-	f->eax = process_wait (tid_arg);
+	stack_read (&arg1,0,esp_address);
+	f->eax = process_wait ((tid_t)arg1);
 	break;
 	/* hyunjun */
 	case SYS_CREATE:

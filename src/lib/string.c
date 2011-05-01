@@ -379,7 +379,7 @@ strtok_n (char *dest, char *src, char key)
 	int i = 0;
 	while(1)
 	{
-		if (src[i]==key) 
+		if (src[i]==key||src[i]=='\0') 
 		{
 			dest[i]='\0';
 			break;
