@@ -93,15 +93,15 @@ void stack_read (uint32_t *data,int i,void **esp)
 void stack_push (void *data, int bytelength, void **esp)
 {
   //printf("\n>>stack_push:start\n");
-  int i=0;
+  int i=bytelength-1;
   char *bytedata = data,*pointer = *((char **)esp);
   while(1)
   {
-    pointer -= 1;
+    if ( i < 0 ) break;
+    pointer--;
     //printf("%x=%x,length=%i,i=%i\n",pointer,bytedata[bytelength-i-1],bytelength,i);
-    *pointer = bytedata[bytelength-i-1];
-    if ( bytelength-i-1 == 0 ) break;
-    i++;
+    *pointer = bytedata[i];
+    i--;
   }  
   *esp = (void *)pointer;
   //printf(">>stack_push:end\n");
@@ -608,8 +608,7 @@ setup_stack (void **esp, char *file_name)
 
   /* pushing blank */
   for (j=0;j<4;j++) blank[j]=0;
-  if((((uint32_t)(*esp))%4)!=0)
-  	stack_push((void *)blank,(int)(((uint32_t)(*esp))%4),esp);
+  stack_push((void *)blank,(int)(((uint32_t)(*esp))%4),esp);
   /* pushing argv[j]=0 */
   stack_push((void *)blank,4,esp);
 
