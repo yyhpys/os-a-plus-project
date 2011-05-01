@@ -92,16 +92,19 @@ void stack_read (uint32_t *data,int i,void **esp)
 /* prj3: pushes data by 1 byte */
 void stack_push (void *data, int bytelength, void **esp)
 {
+  //printf("\n>>stack_push:start\n");
   int i=0;
   char *bytedata = data,*pointer = *((char **)esp);
   while(1)
   {
     pointer -= 1;
+    //printf("%x=%x,length=%i,i=%i\n",pointer,bytedata[bytelength-i-1],bytelength,i);
     *pointer = bytedata[bytelength-i-1];
     if ( bytelength-i-1 == 0 ) break;
     i++;
   }  
   *esp = (void *)pointer;
+  //printf(">>stack_push:end\n");
 }
   
 
@@ -605,10 +608,11 @@ setup_stack (void **esp, char *file_name)
 
   /* pushing blank */
   for (j=0;j<4;j++) blank[j]=0;
-  stack_push((void *)blank,(int)(((uint32_t)(*esp))%4),esp);
+  if((((uint32_t)(*esp))%4)!=0)
+  	stack_push((void *)blank,(int)(((uint32_t)(*esp))%4),esp);
   /* pushing argv[j]=0 */
   stack_push((void *)blank,4,esp);
-  
+
   /* pushing rest */
   while(1)
   {
