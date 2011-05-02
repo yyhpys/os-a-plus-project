@@ -190,6 +190,10 @@ process_wait (tid_t child_tid UNUSED)
   list_push_back(wait_list, &wtable->waitelem);
 
   for(;;) {
+    old_level = intr_disable();
+    thread_block();
+    intr_set_level(old_level);
+
     if(wtable->child_status == CHILD_ZOMBIE) {
       int return_status = wtable->return_status;
 
@@ -205,10 +209,6 @@ process_wait (tid_t child_tid UNUSED)
 
       return -1;
     }
-
-    old_level = intr_disable();
-    thread_block();
-    intr_set_level(old_level);
   }
 
   return -1;
@@ -226,8 +226,9 @@ process_exit_with_status (int status) {
     wtable->return_status = status;
     wtable->child_status = CHILD_ZOMBIE;
 
-    if(parent_t->tid == wtable->self_tid)
+    if(parent_t->tid == wtable->self_tid) {
       thread_unblock(parent_t);
+    }
   }
   
   //printf("exit status: %d\n", status);
