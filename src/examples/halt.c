@@ -9,6 +9,9 @@
 int
 main (void)
 {
-  halt ();
+  for(;;){
+
+			printf("wow!");
+	}
   /* not reached */
 }
