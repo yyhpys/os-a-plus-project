@@ -236,15 +236,15 @@ process_exit_with_status (int status) {
       thread_unblock(parent_t);
 		}
 
-  	for (e = list_begin (child_list); e != list_end (child_list);
+
+  }
+    	for (e = list_begin (child_list); e != list_end (child_list);
        e = list_next (e)) {
     	struct thread *child_thread = list_entry (e, struct thread, childelem);
 
 			child_thread->parent_t = init_t;
 			list_push_back(&init_t->child_list, &child_thread->childelem);
 		}
-  }
-  
   //printf("exit status: %d\n", status);
 
   thread_exit(); //thread_exit() call process_exit()
