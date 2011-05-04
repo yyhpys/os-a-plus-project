@@ -121,7 +121,7 @@ get_wait_table_with_child_tid (tid_t tid)
     struct wait_table *wtable = list_entry (e, struct wait_table, waitelem);
 
     if(wtable->child_tid == tid)
-	return wtable;
+			return wtable;
   }
 
   return NULL;
@@ -221,6 +221,10 @@ int
 process_exit_with_status (int status) {
   struct thread *current_t = thread_current();
   struct thread *parent_t = current_t->parent_t;
+	struct thread *init_t = get_thread_with_tid(1);
+
+  struct list_elem *e;
+  struct list *child_list = &current_t->child_list;
 
   struct wait_table *wtable = get_wait_table_with_child_tid(current_t->tid);
 
@@ -228,8 +232,17 @@ process_exit_with_status (int status) {
     wtable->return_status = status;
     wtable->child_status = CHILD_ZOMBIE;
 
-    if(parent_t->tid == wtable->self_tid)
+    if(parent_t->tid == wtable->self_tid) {
       thread_unblock(parent_t);
+		}
+
+  	for (e = list_begin (child_list); e != list_end (child_list);
+       e = list_next (e)) {
+    	struct thread *child_thread = list_entry (e, struct thread, childelem);
+
+			child_thread->parent_t = init_t;
+			list_push_back(&init_t->child_list, &child_thread->childelem);
+		}
   }
   
   //printf("exit status: %d\n", status);

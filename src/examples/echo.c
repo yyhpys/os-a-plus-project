@@ -8,7 +8,7 @@ main (int argc, char **argv)
 
   for (i = 1; i < argc; i++) {
     printf ("executing %s ", argv[i]);
-		wait(exec(argv[i]));
+		exec(argv[i]);
 		printf ("\n");
 	}
   
