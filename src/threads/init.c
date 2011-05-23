@@ -27,6 +27,7 @@
 #include "userprog/gdt.h"
 #include "userprog/syscall.h"
 #include "userprog/tss.h"
+#include "userprog/lru.h"
 #else
 #include "tests/threads/tests.h"
 #endif
@@ -34,6 +35,9 @@
 #include "devices/disk.h"
 #include "filesys/filesys.h"
 #include "filesys/fsutil.h"
+#endif
+#ifdef VM
+#include "vm/frame.h"
 #endif
 
 /* Amount of physical memory, in 4 kB pages. */
@@ -83,7 +87,10 @@ main (void)
      then enable console locking. */
   thread_init ();
   console_init ();  
-
+  /* prj vm */
+  ft_init ();
+  lru_init ();
+  /* //prj vm */
   /* Greet user. */
   printf ("Pintos booting with %'zu kB RAM...\n", ram_pages * PGSIZE / 1024);
 
