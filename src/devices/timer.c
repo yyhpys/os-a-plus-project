@@ -7,6 +7,7 @@
 #include "threads/io.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "userprog/lru.h"
   
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -205,7 +206,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   /*modified: start*/
   wake_up_block_list ();
   /*modified: end*/
-
+  lru_handler ();
   thread_tick ();
 }
 
@@ -278,7 +279,8 @@ wake_up_block_list(void)
 	struct list *bl = blocklist ();
 	struct thread *t;
 	enum intr_level old_level;
-	int ctime,i;
+	int ctime;
+	unsigned int i;
 	tid_t threadid;
 	
 	//ASSERT (intr_get_level () == INTR_OFF);
