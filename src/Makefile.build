@@ -60,7 +60,9 @@ userprog_SRC += userprog/lru.c
 
 # No virtual memory code yet.
 #vm_SRC = vm/file.c			# Some file.
-vm_SRC = vm/frame.c
+vm_SRC  = vm/frame.c
+vm_SRC += vm/pr.c
+vm_SRC += vm/swap.c
 
 # Filesystem code.
 filesys_SRC  = filesys/filesys.c	# Filesystem core.
