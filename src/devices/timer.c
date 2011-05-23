@@ -206,7 +206,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   /*modified: start*/
   wake_up_block_list ();
   /*modified: end*/
-  lru_handler ();
+  if (ticks%10000==0)lru_handler ();
   thread_tick ();
 }
 
