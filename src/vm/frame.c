@@ -11,11 +11,15 @@ void ft_init(void)
   list_init(&fl);
 }
 
-void fte_create(void *page_addr)
+void fte_create(void *page_addr, bool user)
 {
   struct frame *f;
-  
-  f = palloc_get_page(PAL_ZERO);
+
+	if(user)
+  	f = palloc_get_page(PAL_USER);
+	else
+		f = palloc_get_page(PAL_ZERO);
+
   f->addr = (uint32_t *)page_addr;
   list_push_back(&fl,&f->elem);
 }
