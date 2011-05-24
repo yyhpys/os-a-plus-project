@@ -5,10 +5,9 @@
 #include "threads/pte.h"
 #include "devices/disk.h"
 #include "userprog/pagedir.h"
-#define SWAPMAX 8192
+#include "threads/thread.h"
 
 static uint32_t swap_slot_cnt;
-static int swap_slot_bitmap[SWAPMAX];
 
 struct disk *swap_disk;
 
@@ -113,7 +112,9 @@ void swap_in(void *vaddr, uint32_t *page)
 	for(i = 0; i < 8; i++)
 		disk_read(swap_disk, used_bit*8+i, page+DISK_SECTOR_SIZE*i);
 	swap_slot_cnt++;
-	
+
+	list_remove(&s->thread_elem);
+
 	set_page_valid(vaddr, page);
 } 
 
@@ -135,6 +136,8 @@ void swap_out(void *vaddr)
 	for(i = 0; i < 8; i++)
 		disk_write(swap_disk, empty*8+i, page+DISK_SECTOR_SIZE*i);
 	swap_slot_cnt--;
-	
+
+	list_push_back(&thread_current()->swap_list, &s->thread_elem);
+
 	set_page_invalid (vaddr, s->number);
 }
