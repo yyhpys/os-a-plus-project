@@ -38,6 +38,7 @@
 #endif
 #ifdef VM
 #include "vm/frame.h"
+#include "vm/swap.h"
 #endif
 
 /* Amount of physical memory, in 4 kB pages. */
@@ -90,6 +91,7 @@ main (void)
   /* prj vm */
   ft_init ();
   lru_init ();
+  swap_init ();
   /* //prj vm */
   /* Greet user. */
   printf ("Pintos booting with %'zu kB RAM...\n", ram_pages * PGSIZE / 1024);
