@@ -117,8 +117,6 @@ kill (struct intr_frame *f)
 /* pr4:start */
 bool is_stack_access(bool user, struct intr_frame *f, void *fault_addr) {
 
-	void * page = pg_round_down(fault_addr);
-
 	if(!user){
 		//modification on f->esp
 		return false;
@@ -153,7 +151,6 @@ page_fault (struct intr_frame *f)
   bool user;         /* True: access by user, false: access by kernel. */
   void *fault_addr;  /* Fault address. */
 
-	uint32_t *pte;
   /* Obtain faulting address, the virtual address that was
      accessed to cause the fault.  It may point to code or to
      data.  It is not necessarily the address of the instruction
@@ -179,7 +176,7 @@ page_fault (struct intr_frame *f)
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
   if(not_present) {
-//		pte = lookup_page_ext ((uint32_t *)pd_no(fault_addr), fault_addr, false);
+
 		if(is_page_exist(fault_addr)){
 			//swap page exist -> page replacement
 			page_replacement(fault_addr);

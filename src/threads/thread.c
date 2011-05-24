@@ -281,6 +281,10 @@ thread_create (const char *name, int priority,
   sf->eip = switch_entry;
   sf->ebp = 0;
 
+	/* prj4 */
+	list_init(&t->swap_list);
+	/* prf4 */
+
   intr_set_level (old_level);
 
   /* Add to run queue. */

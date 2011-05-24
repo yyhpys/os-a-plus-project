@@ -114,6 +114,9 @@ struct thread
     struct list_elem childelem;	/* List element for child list */
     /*prj3: end*/
 
+		/*prj4: start*/
+		struct list swap_list;
+		/*prj4: end*/
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 

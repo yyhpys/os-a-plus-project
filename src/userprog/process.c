@@ -19,6 +19,8 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
+#include "vm/frame.h"
+#include "vm/swap.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (char *cmdline, void (**eip) (void), void **esp);
@@ -258,12 +260,24 @@ process_exit (void)
   uint32_t *pd;
 
 	/*prj4:start*/
-	//free!
+	struct list *swap_list = &cur->swap_list;
+  struct list_elem *e;
+
+	for (e = list_begin (swap_list); e != list_end (swap_list);
+       e = list_next (e)) {
+    struct swap_slot *s = list_entry (e, struct swap_slot, thread_elem);
+
+		swap_slot_bitmap[s->index] = 0;
+  }
 	/*prj4:end*/
 
   /* Destroys the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
+
+	/*prj4*/
+	fte_destroy(pd);
+	/*prj4*/
   if (pd != NULL) 
     {
       /* Correct ordering here is crucial.  We must set
@@ -566,12 +580,14 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       uint8_t *kpage = palloc_get_page (PAL_USER);
       if (kpage == NULL)
         return false;
-			fte_create(kpage, false);
+
+			fte_create(kpage, true);
 
       /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
           palloc_free_page (kpage);
+					fte_destroy(kpage);
           return false; 
         }
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
@@ -580,6 +596,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       if (!install_page (upage, kpage, writable)) 
         {
           palloc_free_page (kpage);
+					fte_destroy(kpage);
           return false; 
         }
 
