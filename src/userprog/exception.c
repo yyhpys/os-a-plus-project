@@ -118,12 +118,10 @@ kill (struct intr_frame *f)
 bool is_stack_access(bool user, struct intr_frame *f, void *fault_addr) {
 
 	void * page = pg_round_down(fault_addr);
-	if(page < PHYS_BASE - PGSIZE * 2048)
-	   return false;
-
 
 	if(!user){
 		//modification on f->esp
+		return false;
 	}
 
 	if(fault_addr >= (f->esp))
