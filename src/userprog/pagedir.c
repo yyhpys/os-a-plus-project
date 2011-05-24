@@ -85,6 +85,12 @@ lookup_page (uint32_t *pd, const void *vaddr, bool create)
   return &pt[pt_no (vaddr)];
 }
 
+uint32_t *
+lookup_page_ext (uint32_t *pd, const void *vaddr, bool create)
+{
+	return lookup_page(pd, vaddr, create);
+}
+
 uint32_t *pagedir_get_pte (void *vaddr)
 {
   return lookup_page ((uint32_t *)pd_no(vaddr),vaddr,0);

@@ -58,8 +58,6 @@ userprog_SRC += userprog/gdt.c		# GDT initialization.
 userprog_SRC += userprog/tss.c		# TSS management.
 userprog_SRC += userprog/lru.c
 
-# No virtual memory code yet.
-#vm_SRC = vm/file.c			# Some file.
 vm_SRC  = vm/frame.c
 vm_SRC += vm/pr.c
 vm_SRC += vm/swap.c

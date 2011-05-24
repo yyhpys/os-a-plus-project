@@ -14,3 +14,6 @@ void swap_init(void);
 void swap_in(void *, uint32_t *);
 void swap_out(void *);
 
+void set_page_valid (void *vaddr, uint32_t *paddr);
+
+bool is_page_exist(void *);

@@ -48,7 +48,7 @@ int has_empty_slot(uint32_t *pte)
 	}
 	return retval;
 }*/
-static void set_page_valid (void *vaddr, uint32_t *paddr)
+void set_page_valid (void *vaddr, uint32_t *paddr)
 {
   *paddr = *paddr >> 12;
   pagedir_set_valid((uint32_t *)pd_no(vaddr),vaddr,1);
@@ -59,6 +59,32 @@ static void set_page_invalid (void *vaddr, uint32_t index)
 {
   pagedir_set_valid((uint32_t *)pd_no(vaddr),vaddr,0);
   pagedir_set_paddr((uint32_t *)pd_no(vaddr),vaddr,index);
+}
+
+int swap_count ()
+{
+		  return list_size(&swap_table);
+}
+
+bool is_page_exist(void *vaddr)
+{
+  uint32_t swap_slot_index;
+	int i;
+	struct swap_slot *s;
+  
+  swap_slot_index = parse_pte(vaddr);
+  ASSERT(swap_slot_index < SWAPMAX);
+  
+	for(i=0; i<swap_count(); i++)
+	{
+		s = list_entry(list_pop_front(&swap_table), struct swap_slot, elem);
+		list_push_back(&swap_table,&s->elem);
+		if(s->number == swap_slot_index){
+			return true;
+		}	
+	}
+
+	return false;
 }
 
 void swap_in(void *vaddr, uint32_t *page)

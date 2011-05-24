@@ -17,6 +17,7 @@
 #endif
 	/*modified:start*/
 #include "threads/priority_queue.h"
+#include "vm/frame.h"
 	/*modified:end*/
 
 /* Random value for struct thread's `magic' member.
