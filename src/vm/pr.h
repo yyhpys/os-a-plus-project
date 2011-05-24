@@ -1,4 +1,4 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-bool page_replacement (void *);
+void page_replacement (void *);

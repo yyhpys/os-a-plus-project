@@ -12,4 +12,4 @@ threads/init.o: ../../threads/init.c ../../threads/init.h \
  ../../userprog/exception.h ../../userprog/gdt.h ../../userprog/syscall.h \
  ../../userprog/tss.h ../../userprog/lru.h ../../devices/disk.h \
  ../../lib/inttypes.h ../../filesys/filesys.h ../../filesys/off_t.h \
- ../../filesys/fsutil.h ../../vm/frame.h
+ ../../filesys/fsutil.h ../../vm/frame.h ../../vm/swap.h

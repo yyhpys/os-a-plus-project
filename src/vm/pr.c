@@ -3,18 +3,17 @@
 #include "threads/palloc.h"
 #include "vm/swap.h"
 
-bool page_replacement(void *ste)
+void page_replacement(void *vaddr)
 {
   uint32_t *paddr,*lru_page;
   
   if (!(paddr = palloc_get_page(PAL_ZERO)))
+    swap_in(vaddr, paddr);
+  else
   {
     lru_page = lru_get_page();
-    /*swap*/
-    if(!swap_out(lru_page)||!swap_in(lru_page,(uint32_t *)ste))
-      return false;
+
+    swap_out(lru_page);
+    swap_in(vaddr,lru_page);
   }
-  else if (!swap_in(lru_page,(uint32_t *)ste)) return false;
-  
-  return true;
 }
