@@ -85,6 +85,11 @@ lookup_page (uint32_t *pd, const void *vaddr, bool create)
   return &pt[pt_no (vaddr)];
 }
 
+uint32_t *pagedir_get_pte (void *vaddr)
+{
+  return lookup_page ((uint32_t *)pd_no(vaddr),vaddr,0);
+}
+
 /* Adds a mapping in page directory PD from user virtual page
    UPAGE to the physical frame identified by kernel virtual
    address KPAGE.
@@ -183,6 +188,33 @@ pagedir_set_dirty (uint32_t *pd, const void *vpage, bool dirty)
           invalidate_pagedir (pd);
         }
     }
+}
+
+void
+pagedir_set_valid (uint32_t *pd, const void *vpage, bool end) 
+{
+  uint32_t *pte = lookup_page (pd, vpage, false);
+  if (pte != NULL) 
+    {
+      if (end)
+        *pte |= PTE_P;
+      else 
+        {
+          *pte &= ~(uint32_t) PTE_P;
+          invalidate_pagedir (pd);
+        }
+    }
+}
+
+void
+pagedir_set_paddr (uint32_t *pd, const void *vpage, uint32_t src) 
+{
+  uint32_t *pte = lookup_page (pd, vpage, false);
+  if (pte != NULL) 
+  {
+    *pte = (*pte & 0x00000fff)|(src<<12);
+    invalidate_pagedir (pd);
+  }
 }
 
 /* Returns true if the PTE for virtual page VPAGE in PD has been

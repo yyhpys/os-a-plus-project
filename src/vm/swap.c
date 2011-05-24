@@ -1,7 +1,10 @@
 #include <debug.h>
+#include <stdbool.h>
 #include "vm/swap.h"
 #include "threads/malloc.h"
+#include "threads/pte.h"
 #include "devices/disk.h"
+#include "userprog/pagedir.h"
 #define SWAPMAX 8192
 
 static uint32_t swap_slot_cnt;
@@ -9,13 +12,15 @@ static int swap_slot_bitmap[SWAPMAX];
 
 struct disk *swap_disk;
 
-static void *parse_ste(uint32_t *ste)
+static uint32_t parse_pte(void *vaddr)
 {
-  uint32_t *new = (uint32_t *) malloc(sizeof(uint32_t));
+  uint32_t new, *ste = pagedir_get_pte(vaddr);
+  new = *ste;
   
-  *new = *ste;
-  
-  new = new & 
+  new = (new & 0xfffff000)>>12;
+  return new;
+} 
+
 void swap_init()
 {
 	int i;
@@ -25,9 +30,10 @@ void swap_init()
 		swap_slot_bitmap[i] = 0;
 }
 
-
-int has_empty_slot(uint32_t swap_slot_index)
+/*
+int has_empty_slot(uint32_t *pte)
 {
+  uint32_t swap_slot_index;
 	int retval = 0;
 	struct list_elem *e;
 	
@@ -41,34 +47,53 @@ int has_empty_slot(uint32_t swap_slot_index)
 		}			
 	}
 	return retval;
+}*/
+static void set_page_valid (void *vaddr, uint32_t *paddr)
+{
+  *paddr = *paddr >> 12;
+  pagedir_set_valid((uint32_t *)pd_no(vaddr),vaddr,1);
+  pagedir_set_paddr((uint32_t *)pd_no(vaddr),vaddr,*paddr);
 }
 
+static void set_page_invalid (void *vaddr, uint32_t index)
+{
+  pagedir_set_valid((uint32_t *)pd_no(vaddr),vaddr,0);
+  pagedir_set_paddr((uint32_t *)pd_no(vaddr),vaddr,index);
+}
 
-void swap_in(void *page, uint32_t swap_slot_index)
+void swap_in(void *vaddr, uint32_t *page)
 {
 	//ASSERT (has_empty_slot(swap_slot_index)); 
-	int i, used_bit;
-	struct list_elem *e;
-   
-	for(e = list_begin(&swap_table); e != list_end(&swap_table); e = list_next(e))
+	uint32_t swap_slot_index;
+	int i, used_bit = 0;
+	struct swap_slot *s;
+  
+  swap_slot_index = parse_pte(vaddr);
+  ASSERT(swap_slot_index < SWAPMAX);
+  
+	while(1)
 	{
-		struct swap_slot *s = list_entry(e, struct swap_slot, elem);
-		if(s->index == swap_slot_index){
-			list_remove(e);
+		s = list_entry(list_pop_front(&swap_table), struct swap_slot, elem);
+		if(s->number == swap_slot_index){
 			swap_slot_bitmap[s->number] = 0;
 			used_bit = s->number;
+			break;
 		}
+		list_push_back(&swap_table,&s->elem);
 	}
 	swap_disk = disk_get(1,1);
 	ASSERT(!swap_disk);
    
 	for(i = 0; i < 8; i++)
-		disk_read(swap_disk, used_bit*8+i, page+DISK_SETOR_SIZE*i);
-	swap_slot_cnt++;  
+		disk_read(swap_disk, used_bit*8+i, page+DISK_SECTOR_SIZE*i);
+	swap_slot_cnt++;
+	
+	set_page_valid(vaddr, page);
 } 
 
-bool swap_out(void *page, uint32_t swap_slot_index)
+void swap_out(void *vaddr)
 {
+  uint32_t *page = pagedir_get_page ((uint32_t *)pd_no(vaddr),vaddr);
 	int i, empty;
 	struct swap_slot *s  = malloc(sizeof(struct swap_slot));
 	swap_disk = disk_get(1,1);
@@ -81,8 +106,9 @@ bool swap_out(void *page, uint32_t swap_slot_index)
 	swap_slot_bitmap[empty] = 1;
 	list_push_front(&swap_table, &(s->elem));
 	s->number = empty;
-	s->index = swap_slot_index;
 	for(i = 0; i < 8; i++)
-		disk_write(swap_disk, empty*8+i, page+DIST_SECTOR_SIZE*i);
+		disk_write(swap_disk, empty*8+i, page+DISK_SECTOR_SIZE*i);
 	swap_slot_cnt--;
+	
+	set_page_invalid (vaddr, s->number);
 }

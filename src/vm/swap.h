@@ -9,8 +9,8 @@ struct swap_slot
 
 struct list swap_table;
 
-void swap_init();
-int has_empty_slot(uint32_t swap_slot_index);
-void swap_in(void *page, uint32_t swap_slot_index);
-void swap_out(void *page, uint32_t swap_slot_index);
+void swap_init(void);
+/*int has_empty_slot(uint32_t *);*/
+void swap_in(void *, uint32_t *);
+void swap_out(void *);
 

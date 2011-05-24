@@ -48,7 +48,6 @@ void lru_handler ()
   uint32_t *page_addr,*pd;
   int i,cnt;
   bool result;
-  struct list_elem *elem;
   struct record *r;
   
   cnt = fte_count();
@@ -67,7 +66,7 @@ void *lru_get_page ()
 {
   struct list_elem *elem;
   struct record *r,*result;
-  uint8_t least;
+  uint8_t least=0xff;
   
   for (elem = list_front(&record_list);
     elem!=list_end(&record_list);elem = list_next(elem))
