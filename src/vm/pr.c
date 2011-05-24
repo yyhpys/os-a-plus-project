@@ -23,7 +23,7 @@ void page_replacement(void *vaddr)
 void stack_growth(void *vaddr){
   uint32_t *paddr,*lru_page;
   
-  if ((paddr = palloc_get_page(PAL_USER)) != NULL) {
+  if ((paddr = palloc_get_page(PAL_ZERO)) != NULL) {
 		fte_create(paddr, false);
 		install_page_ext (pg_round_down(vaddr), paddr, true);
 		set_page_valid(pg_round_down(vaddr), paddr);
