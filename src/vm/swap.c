@@ -9,6 +9,13 @@ static int swap_slot_bitmap[SWAPMAX];
 
 struct disk *swap_disk;
 
+static void *parse_ste(uint32_t *ste)
+{
+  uint32_t *new = (uint32_t *) malloc(sizeof(uint32_t));
+  
+  *new = *ste;
+  
+  new = new & 
 void swap_init()
 {
 	int i;
