@@ -33,5 +33,6 @@ struct wait_table
     struct list_elem waitelem;
   };
 /*prj3: end*/
-
+bool
+install_page_ext (void *upage, void *kpage, bool writable);
 #endif /* userprog/process.h  */

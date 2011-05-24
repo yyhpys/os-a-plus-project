@@ -7,7 +7,7 @@ struct frame
   };
 
 void ft_init (void);
-void fte_create (void *);
+void fte_create (void *, bool);
 void fte_destroy (void *);
 int fte_count (void);
 void *fte_get (unsigned int);
