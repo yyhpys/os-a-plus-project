@@ -4,10 +4,16 @@
 #include "userprog/gdt.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "threads/pte.h"
+#include "userprog/pagedir.h"
+#include "vm/pr.h"
+#include "vm/swap.h"
+#include "userprog/process.h"
 
 /* Number of page faults that are processed. */
 static long long page_fault_cnt;
 
+bool is_stack_access(bool user, struct intr_frame *f, void *fault_addr);
 static void kill (struct intr_frame *);
 static void page_fault (struct intr_frame *);
 
@@ -108,6 +114,28 @@ kill (struct intr_frame *f)
     }
 }
 
+/* pr4:start */
+bool is_stack_access(bool user, struct intr_frame *f, void *fault_addr) {
+
+	void * page = pg_round_down(fault_addr);
+	if(page < PHYS_BASE - PGSIZE * 2048)
+	   return false;
+
+
+	if(!user){
+		//modification on f->esp
+	}
+
+	if(fault_addr >= (f->esp))
+		return true;
+
+	if(((f->esp)-fault_addr)==4 || ((f->esp)-fault_addr)==32)
+		return true;
+	else
+		return false;
+}
+/* pr4:end */
+
 /* Page fault handler.  This is a skeleton that must be filled in
    to implement virtual memory.  Some solutions to project 2 may
    also require modifying this code.
@@ -127,6 +155,7 @@ page_fault (struct intr_frame *f)
   bool user;         /* True: access by user, false: access by kernel. */
   void *fault_addr;  /* Fault address. */
 
+	uint32_t *pte;
   /* Obtain faulting address, the virtual address that was
      accessed to cause the fault.  It may point to code or to
      data.  It is not necessarily the address of the instruction
@@ -151,11 +180,29 @@ page_fault (struct intr_frame *f)
   /* To implement virtual memory delete the rest of the function
      body, and replace it with code that brings in the page to
      which fault_addr refers. */
-  printf ("Page fault at %p: %s error %s page in %s context.\n",
-          fault_addr,
-          not_present ? "not present" : "rights violation",
-          write ? "writing" : "reading",
-          user ? "user" : "kernel");
-  kill (f);
+  if(not_present) {
+//		pte = lookup_page_ext ((uint32_t *)pd_no(fault_addr), fault_addr, false);
+		if(is_page_exist(fault_addr)){
+			//swap page exist -> page replacement
+			page_replacement(fault_addr);
+		} else if(is_stack_access(user, f, fault_addr)){
+			//need stack growth -> stack growth
+			stack_growth(fault_addr);
+		} else {
+			printf("Page fault(1): at %p: %s error %s page in %s context.\n",
+						fault_addr, not_present ? "not present" : "rights violation",
+						write ? "writing" : "reading",
+	          user ? "user" : "kernel");
+
+			process_exit_with_status(-1);
+		}
+	} else {
+			printf("Page fault(2): at %p: %s error %s page in %s context.\n",
+						fault_addr, not_present ? "not present" : "rights violation",
+						write ? "writing" : "reading",
+	          user ? "user" : "kernel");
+
+			process_exit_with_status(-1);
+	}
 }
 

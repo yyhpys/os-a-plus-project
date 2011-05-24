@@ -6,7 +6,7 @@
 
 static struct list fl;
 
-void ft_init()
+void ft_init(void)
 {
   list_init(&fl);
 }

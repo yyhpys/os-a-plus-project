@@ -19,4 +19,6 @@ void pagedir_activate (uint32_t *pd);
 
 uint32_t *pagedir_get_pte (void *vaddr);
 
+uint32_t *lookup_page_ext (uint32_t *pd, const void *vaddr, bool create);
+
 #endif /* userprog/pagedir.h  */
