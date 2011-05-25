@@ -55,9 +55,8 @@ void lru_handler ()
   for (i=0; i<cnt ; i++)
   {
     page_addr = fte_get((unsigned int)i);
-    if (!(r = record_srch(page_addr))){
-
-		}
+    r = record_srch(page_addr);
+    ASSERT(!r);
     pd = (uint32_t *)pd_no(page_addr);
     result = process_dabit(pd,(void *)page_addr);
     r->data = ( r->data >> 1 ) & ( result << (RECORD_BIT-1) );
@@ -89,5 +88,5 @@ void lru_create_record(void *paddr)
   r = (struct record *)malloc(sizeof(struct record));
   list_push_back(&record_list, &r->elem);
   r->data = 0x00;
-  r->paddr = (uint32_t *)paddr
+  r->paddr = (uint32_t *)paddr;
 }
