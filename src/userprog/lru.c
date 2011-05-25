@@ -6,6 +6,7 @@
 #include "threads/malloc.h"
 #include "threads/pte.h"
 #include "vm/frame.h"
+#include "threads/palloc.h"
 
 static struct list record_list;
 
@@ -54,8 +55,11 @@ void lru_handler ()
   for (i=0; i<cnt ; i++)
   {
     page_addr = fte_get((unsigned int)i);
-    if (!(r = record_srch(page_addr)))
+    if (!(r = record_srch(page_addr))){
       r = (struct record *)malloc(sizeof(struct record));
+			//r = palloc_get_page(PAL_ZERO);
+			list_push_back(&record_list, &r->elem);
+		}
     pd = (uint32_t *)pd_no(page_addr);
     result = process_dabit(pd,(void *)page_addr);
     r->data = ( r->data >> 1 ) & ( result << (RECORD_BIT-1) );
