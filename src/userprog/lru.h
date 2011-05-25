@@ -14,3 +14,4 @@ void lru_init(void);
 void lru_handler(void);
 void *lru_get_page(void);
 void lru_create_record(void *);
+void lru_destroy_record(void *);
