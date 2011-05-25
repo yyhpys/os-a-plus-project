@@ -5,6 +5,7 @@
 #include "vm/frame.h"
 #include "userprog/lru.h"
 #include "vm/swap.h"
+#include "userprog/process.h"
 
 static struct list fl;
 
@@ -16,16 +17,16 @@ void ft_init(void)
 void fte_create(void *page_addr, bool user)
 {
   struct frame *f;
-  struct record *r;
   uint32_t *lru_page;
-
+/*
 	if(user)
    {
      f = palloc_get_page(PAL_USER);
-     lru_create_record(page_addr);
-   }
+  }
 	else
 	  f = palloc_get_page(PAL_ZERO);
+*/
+	f = palloc_get_page(PAL_ZERO);
 
 	if(f == NULL) {
 		if(fte_count()<=0)
@@ -36,6 +37,8 @@ void fte_create(void *page_addr, bool user)
     swap_out(lru_page);
 		//set_page_valid(pg_round_down(vaddr), lru_page);
 	}
+
+	lru_create_record(page_addr);
 
   f->addr = (uint32_t *)page_addr;
   list_push_back(&fl,&f->elem);
@@ -48,7 +51,7 @@ void fte_destroy(void *page_addr)
 	
 	if(fte_count()<=0)
 			return;
-  if (*page_addr>0xc0000000)
+  if (page_addr>0xc0000000)
     lru_destroy_record(page_addr);
     
   for(i=0; i<fte_count(); i++)

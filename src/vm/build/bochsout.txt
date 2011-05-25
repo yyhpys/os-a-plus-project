@@ -29,7 +29,7 @@
 00000000000i[     ]   SB16 support: no
 00000000000i[     ]   USB support: no
 00000000000i[     ]   VGA extension support: vbe 
-00000000000i[MEM0 ] allocated memory at 0xb6bfb008. after alignment, vector=0xb6bfc000
+00000000000i[MEM0 ] allocated memory at 0xb6b3d008. after alignment, vector=0xb6b3e000
 00000000000i[MEM0 ] 4.00MB
 00000000000i[MEM0 ] mem block size = 0x00100000, blocks=4
 00000000000i[MEM0 ] rom at 0xfffe0000/131072 ('/usr/local/share/bochs/BIOS-bochs-latest')
@@ -56,7 +56,7 @@
 00000000000i[     ] init_dev of 'keyboard' plugin device by virtual method
 00000000000i[KBD  ] will paste characters every 1000 keyboard ticks
 00000000000i[     ] init_dev of 'harddrv' plugin device by virtual method
-00000000000i[HD   ] HD on ata0-0: '/tmp/txXx_MIGCf.dsk' 'flat' mode 
+00000000000i[HD   ] HD on ata0-0: '/tmp/X7yymHVYjZ.dsk' 'flat' mode 
 00000000000i[HD   ] HD on ata0-1: 'fs.dsk' 'flat' mode 
 00000000000i[HD   ] HD on ata1-1: 'swap.dsk' 'flat' mode 
 00000000000i[HD   ] Using boot sequence disk, none, none
@@ -116,87 +116,26 @@
 00004753765i[BIOS ] IDE time out
 00004761548i[BIOS ] ata1-1: PCHS=6/16/63 translation=none LCHS=6/16/63
 00007828580i[BIOS ] Booting from 0000:7c00
-00010719425i[CPU0 ] CPU is in protected mode (active)
-00010719425i[CPU0 ] CS.d_b = 32 bit
-00010719425i[CPU0 ] SS.d_b = 32 bit
-00010719425i[CPU0 ] | EAX=c010b5a5  EBX=c0101538  ECX=00000000  EDX=0000000e
-00010719425i[CPU0 ] | ESP=c0124fc8  EBP=c0125010  ESI=c012504c  EDI=c0125124
-00010719425i[CPU0 ] | IOPL=0 id vip vif ac vm RF nt of df if tf SF zf AF pf cf
-00010719425i[CPU0 ] | SEG selector     base    limit G D
-00010719425i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
-00010719425i[CPU0 ] |  CS:0008( 0001| 0|  0) 00000000 ffffffff 1 1
-00010719425i[CPU0 ] |  DS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00010719425i[CPU0 ] |  SS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00010719425i[CPU0 ] |  ES:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00010719425i[CPU0 ] |  FS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00010719425i[CPU0 ] |  GS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00010719425i[CPU0 ] | EIP=c010b5ba (c010b5ba)
-00010719425i[CPU0 ] | CR0=0xe0010015 CR2=0xc0124fc4
-00010719425i[CPU0 ] | CR3=0x0012f000 CR4=0x00000000
-00010719425i[CPU0 ] 0xc010b5ba>> call .-40514 (0xc010177d) : E8BE61FFFF
-00010719425e[CPU0 ] exception(): 3rd (14) exception with no resolution, shutdown status is 00h, resetting
-00010719425i[SYS  ] bx_pc_system_c::Reset(HARDWARE) called
-00010719425i[CPU0 ] cpu hardware reset
-00010719425i[APIC0] allocate APIC id=0 (MMIO enabled) to 0xfee00000
-00010719425i[CPU0 ] CPUID[0x00000000]: 00000003 756e6547 6c65746e 49656e69
-00010719425i[CPU0 ] CPUID[0x00000001]: 00000f00 00000800 00000000 078bfbff
-00010719425i[CPU0 ] CPUID[0x00000002]: 00410601 00000000 00000000 00000000
-00010719425i[CPU0 ] CPUID[0x00000003]: 00000000 00000000 00000000 00000000
-00010719425i[CPU0 ] CPUID[0x00000004]: 00000000 00000000 00000000 00000000
-00010719425i[CPU0 ] CPUID[0x80000000]: 80000004 00000000 00000000 00000000
-00010719425i[CPU0 ] CPUID[0x80000001]: 00000000 00000000 00000000 00000000
-00010719425i[CPU0 ] CPUID[0x80000002]: 20202020 20202020 20202020 6e492020
-00010719425i[CPU0 ] CPUID[0x80000003]: 286c6574 50202952 69746e65 52286d75
-00010719425i[CPU0 ] CPUID[0x80000004]: 20342029 20555043 20202020 00202020
-00010719425i[     ] reset of 'unmapped' plugin device by virtual method
-00010719425i[     ] reset of 'biosdev' plugin device by virtual method
-00010719425i[     ] reset of 'speaker' plugin device by virtual method
-00010719425i[     ] reset of 'extfpuirq' plugin device by virtual method
-00010719425i[     ] reset of 'ioapic' plugin device by virtual method
-00010719425i[     ] reset of 'keyboard' plugin device by virtual method
-00010719425i[     ] reset of 'harddrv' plugin device by virtual method
-00010719425i[     ] reset of 'serial' plugin device by virtual method
-00010719425i[     ] reset of 'parallel' plugin device by virtual method
-00010722731i[BIOS ] $Revision: 1.247 $ $Date: 2010/04/04 19:33:50 $
-00011036062i[KBD  ] reset-disable command received
-00011161300i[VBIOS] VGABios $Id: vgabios.c,v 1.69 2009/04/07 18:18:20 vruppert Exp $
-00011161371i[VGA  ] VBE known Display Interface b0c0
-00011161403i[VGA  ] VBE known Display Interface b0c5
-00011164328i[VBIOS] VBE Bios $Id: vbe.c,v 1.62 2009/01/25 15:46:25 vruppert Exp $
-00011200000i[XGUI ] charmap update. Font Height is 16
-00011250000i[XGUI ] charmap update. Font Height is 16
-00011477017i[BIOS ] Starting rombios32
-00011477514i[BIOS ] Shutdown flag 0
-00011478182i[BIOS ] ram_size=0x00400000
-00011478633i[BIOS ] ram_end=4MB
-00011489661i[BIOS ] Found 1 cpu(s)
-00011508930i[BIOS ] bios_table_addr: 0x000fbc18 end=0x000fcc00
-00011521607i[BIOS ] bios_table_cur_addr: 0x000fbc18
-00011533824i[BIOS ] ata0-0: PCHS=1/16/63 translation=none LCHS=1/16/63
-00011591844i[BIOS ] ata0-1: PCHS=6/16/63 translation=none LCHS=6/16/63
-00015473291i[BIOS ] IDE time out
-00015481074i[BIOS ] ata1-1: PCHS=6/16/63 translation=none LCHS=6/16/63
-00018548005i[BIOS ] Booting from 0000:7c00
-00019150000p[XGUI ] >>PANIC<< POWER button turned off.
-00019150000i[CPU0 ] CPU is in protected mode (active)
-00019150000i[CPU0 ] CS.d_b = 32 bit
-00019150000i[CPU0 ] SS.d_b = 32 bit
-00019150000i[CPU0 ] | EAX=c0126000  EBX=00000000  ECX=c0126fce  EDX=00000032
-00019150000i[CPU0 ] | ESP=c002ff00  EBP=c002ff28  ESI=c0126000  EDI=00001000
-00019150000i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf zf af pf cf
-00019150000i[CPU0 ] | SEG selector     base    limit G D
-00019150000i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
-00019150000i[CPU0 ] |  CS:0008( 0001| 0|  0) 00000000 ffffffff 1 1
-00019150000i[CPU0 ] |  DS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00019150000i[CPU0 ] |  SS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00019150000i[CPU0 ] |  ES:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00019150000i[CPU0 ] |  FS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00019150000i[CPU0 ] |  GS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00019150000i[CPU0 ] | EIP=c0107483 (c0107483)
-00019150000i[CPU0 ] | CR0=0xe0010015 CR2=0x00000000
-00019150000i[CPU0 ] | CR3=0x00124000 CR4=0x00000000
-00019150000i[CPU0 ] 0xc0107483>> mov byte ptr ds:[ecx], bl : 8819
-00019150000i[CMOS ] Last time is 18 (Thu Jan  1 09:00:18 1970)
-00019150000i[XGUI ] Exit
-00019150000i[     ] restoring default signal behavior
-00019150000i[CTRL ] quit_sim called with exit code 1
+00029387750p[UNMP ] >>PANIC<< Shutdown port: shutdown requested
+00029387750i[CPU0 ] CPU is in protected mode (active)
+00029387750i[CPU0 ] CS.d_b = 32 bit
+00029387750i[CPU0 ] SS.d_b = 32 bit
+00029387750i[CPU0 ] | EAX=0000006e  EBX=c010e220  ECX=c002ff8e  EDX=ffff8900
+00029387750i[CPU0 ] | ESP=c002ff70  EBP=c002ff98  ESI=c010ee84  EDI=c002ff90
+00029387750i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf zf af pf cf
+00029387750i[CPU0 ] | SEG selector     base    limit G D
+00029387750i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
+00029387750i[CPU0 ] |  CS:0008( 0001| 0|  0) 00000000 ffffffff 1 1
+00029387750i[CPU0 ] |  DS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00029387750i[CPU0 ] |  SS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00029387750i[CPU0 ] |  ES:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00029387750i[CPU0 ] |  FS:0023( 0004| 0|  3) 00000000 ffffffff 1 1
+00029387750i[CPU0 ] |  GS:0023( 0004| 0|  3) 00000000 ffffffff 1 1
+00029387750i[CPU0 ] | EIP=c0100161 (c0100160)
+00029387750i[CPU0 ] | CR0=0xe0010015 CR2=0x00000000
+00029387750i[CPU0 ] | CR3=0x00124000 CR4=0x00000000
+00029387750i[CPU0 ] 0xc0100160>> out dx, al : EE
+00029387750i[CMOS ] Last time is 29 (Thu Jan  1 09:00:29 1970)
+00029387750i[XGUI ] Exit
+00029387750i[     ] restoring default signal behavior
+00029387750i[CTRL ] quit_sim called with exit code 1
