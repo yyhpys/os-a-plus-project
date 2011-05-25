@@ -12,15 +12,16 @@ static struct list record_list;
 
 static struct record *record_srch(uint32_t *paddr)
 {
-  struct list_elem *elem;
+  struct list_elem *e;
   struct record *r=NULL;
   
   if (list_empty(&record_list)) return NULL;
   
-  for (elem = list_front(&record_list);
-    elem!=list_end(&record_list);elem = list_next(elem))
+  for (e = list_front(&record_list);
+    e!=list_end(&record_list);e = list_next(e))
   {
-    ASSERT(!(r = list_entry(elem,struct record,elem)))
+    if((r = list_entry(e,struct record,elem)) == NULL)
+				return NULL;
     
     if (r->paddr == paddr) break;
   }
@@ -65,14 +66,14 @@ void lru_handler ()
 
 void *lru_get_page ()
 {
-  struct list_elem *elem;
+  struct list_elem *e;
   struct record *r,*result;
   uint8_t least=0xff;
   
-  for (elem = list_front(&record_list);
-    elem!=list_end(&record_list);elem = list_next(elem))
+  for (e = list_front(&record_list);
+    e!=list_end(&record_list);e = list_next(e))
   {
-    ASSERT(!(r = list_entry(elem,struct record,elem)))
+    ASSERT(!(r = list_entry(e,struct record,elem)))
     if (r->data < least) 
     {
       least = r->data;
@@ -85,17 +86,20 @@ void *lru_get_page ()
 
 void lru_create_record(void *paddr)
 {
+	struct record *r;
   r = (struct record *)malloc(sizeof(struct record));
   list_push_back(&record_list, &r->elem);
   r->data = 0x00;
   r->paddr = (uint32_t *)paddr;
 }
 
-void lru_destory_record(void *paddr)
+void lru_destroy_record(void *paddr)
 {
   struct record *r;
   r = record_srch(paddr);
-  
-  list_remove(&r->elem);
-  free(r);
+ 
+	if(r != NULL){
+  	list_remove(&r->elem);
+  	free(r);
+	}
 }
