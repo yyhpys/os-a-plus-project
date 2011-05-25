@@ -16,12 +16,16 @@ void ft_init(void)
 void fte_create(void *page_addr, bool user)
 {
   struct frame *f;
+  struct record *r;
   uint32_t *lru_page;
 
 	if(user)
-  	f = palloc_get_page(PAL_USER);
+   {
+     f = palloc_get_page(PAL_USER);
+     lru_create_record(page_addr);
+   }
 	else
-		f = palloc_get_page(PAL_ZERO);
+	  f = palloc_get_page(PAL_ZERO);
 
 	if(f == NULL) {
 		if(fte_count()<=0)
