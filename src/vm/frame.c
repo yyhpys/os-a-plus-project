@@ -3,6 +3,8 @@
 #include <debug.h>
 #include "threads/palloc.h"
 #include "vm/frame.h"
+#include "userprog/lru.h"
+#include "vm/swap.h"
 
 static struct list fl;
 
@@ -14,11 +16,22 @@ void ft_init(void)
 void fte_create(void *page_addr, bool user)
 {
   struct frame *f;
+  uint32_t *lru_page;
 
 	if(user)
   	f = palloc_get_page(PAL_USER);
 	else
 		f = palloc_get_page(PAL_ZERO);
+
+	if(f == NULL) {
+		if(fte_count()<=0)
+			process_exit_with_status(-1);
+
+		lru_page = lru_get_page();
+
+    swap_out(lru_page);
+		//set_page_valid(pg_round_down(vaddr), lru_page);
+	}
 
   f->addr = (uint32_t *)page_addr;
   list_push_back(&fl,&f->elem);
@@ -27,8 +40,12 @@ void fte_create(void *page_addr, bool user)
 void fte_destroy(void *page_addr)
 {
   struct frame *f;
-  
-  while(1)
+  int i;
+	
+	if(fte_count()<=0)
+			return;
+
+  for(i=0; i<fte_count(); i++)
   {
     f = list_entry(list_pop_front(&fl),struct frame,elem);
     if (f->addr == (uint32_t *) page_addr) break;
