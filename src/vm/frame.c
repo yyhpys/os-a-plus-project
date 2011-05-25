@@ -48,7 +48,9 @@ void fte_destroy(void *page_addr)
 	
 	if(fte_count()<=0)
 			return;
-
+  if (*page_addr>0xc0000000)
+    lru_destroy_record(page_addr);
+    
   for(i=0; i<fte_count(); i++)
   {
     f = list_entry(list_pop_front(&fl),struct frame,elem);
