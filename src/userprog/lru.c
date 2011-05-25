@@ -90,3 +90,12 @@ void lru_create_record(void *paddr)
   r->data = 0x00;
   r->paddr = (uint32_t *)paddr;
 }
+
+void lru_destory_record(void *paddr)
+{
+  struct record *r;
+  r = record_srch(paddr);
+  
+  list_remove(&r->elem);
+  free(r);
+}
